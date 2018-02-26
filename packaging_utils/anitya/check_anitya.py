@@ -4,16 +4,14 @@ Checks anitya (release-monitoring.org) for updates.
 """
 import argparse
 import re
-import subprocess
 import sys
 from typing import Optional
 
 import requests
 import tabulate
 
-from ..common import config
+from ..common import config, zypper
 
-PROGRAMS = ['tcpflow', 'ddrescueview', 'html-xml-utils', 'fred', 'H2rename', 'chntpw']
 ANITYA_SEARCH_URL = 'https://release-monitoring.org/projects/search/?pattern=%s'
 ANITYA_PROJECT_REGEX = 'https://release-monitoring.org/project/([0-9]+)'
 
@@ -25,7 +23,8 @@ def anitya_find_project_id(proj_name: str) -> Optional[int]:
     search_url = ANITYA_SEARCH_URL % proj_name
     search = requests.get(search_url)
     if search.url == search_url:
-        print("No exact match found for %s." % proj_name, file=sys.stderr)
+        print("No exact or more than one match found for %s. Have a look at %r."
+              "" % (proj_name, search.url), file=sys.stderr)
         return None
     return int(re.match(ANITYA_PROJECT_REGEX, search.url).groups()[0])
 
@@ -36,6 +35,8 @@ def iter_projects(*projects):
     versions = []
     for prog_name in projects:
         prog_id = anitya_find_project_id(proj_name=prog_name)
+        if not prog_id:
+            continue
         res = requests.get('https://release-monitoring.org/project/%d/' % prog_id)
         res.raise_for_status()
         lines = res.text.splitlines()
@@ -45,20 +46,17 @@ def iter_projects(*projects):
                 version = line[line.find('>')+1:line.rfind('<')].split('.')
                 if max_version is None or version > max_version:
                     max_version = version
-        res = subprocess.run(['zypper', 'if', prog_name], stdout=subprocess.PIPE)
-        for line in res.stdout.splitlines():
-            if line.startswith(b'Version'):
-                opensuse_version = line[line.find(b':')+2:line.find(b'-')].decode().split('.')
-                break
+        opensuse_version = zypper.package_version(prog_name)
         versions.append((prog_name, '.'.join(max_version), '.'.join(opensuse_version)))
-    print(tabulate.tabulate(versions, headers=('name', 'anitya', 'opensuse')))
+    if versions:
+        print(tabulate.tabulate(versions, headers=('name', 'anitya', 'opensuse')))
 
 def main():
     """
     Main program.
     """
     parser = argparse.ArgumentParser(description='Check anitya for project versions.')
-    parser.add_argument('projects', type=int, nargs='*',
+    parser.add_argument('projects', nargs='*',
                         help='name of projects to check')
     args = parser.parse_args()
     if args.projects:

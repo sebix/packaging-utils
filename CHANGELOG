@@ -7,3 +7,7 @@ CHANGELOG
 ### check-anitya
 * Added initial code
 * Finds project IDs itself
+
+### common
+* config: added config read function
+* zypper: add package version parser
