@@ -5,7 +5,7 @@ Checks anitya (release-monitoring.org) for updates.
 import argparse
 import re
 import sys
-from typing import Optional
+from typing import List, Optional
 
 import requests
 import tabulate
@@ -28,7 +28,8 @@ def anitya_find_project_id(proj_name: str) -> Optional[int]:
         return None
     return int(re.match(ANITYA_PROJECT_REGEX, search.url).groups()[0])
 
-def iter_projects(*projects):
+
+def iter_projects(*projects: List[str]):
     """
     Iterates over a list of projects and compares versions.
     """
@@ -51,6 +52,7 @@ def iter_projects(*projects):
     if versions:
         print(tabulate.tabulate(versions, headers=('name', 'anitya', 'opensuse')))
 
+
 def main():
     """
     Main program.
@@ -67,6 +69,7 @@ def main():
             iter_projects(*projects.splitlines())
         else:
             print("No projects got as parameter and nothing configured.")
+
 
 if __name__ == '__main__':
     main()

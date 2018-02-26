@@ -3,9 +3,10 @@
 Common functions to deal with zypper.
 """
 import subprocess
+from typing import Optional
 
 
-def package_version(package_name: str) -> str:
+def package_version(package_name: str) -> Optional[str]:
     """
     Returns version of package as reported by `zypper info`.
     """

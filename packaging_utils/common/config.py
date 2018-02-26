@@ -6,6 +6,7 @@ from typing import Optional
 
 CONFIG_DIR = os.path.expanduser("~/.config/packaging_utils/")
 
+
 def read_config(config_name: str) -> Optional[str]:
     """
     Returns content of configuration file or None if it does not exist.
