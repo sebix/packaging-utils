@@ -1,22 +1,29 @@
 #!/usr/bin/python3
 
+import re
 import requests
 import subprocess
+import sys
 import tabulate
-import termstyle
 
-PROGRAMS = [
-    (6700, 'tcpflow'),
-    (16892, 'ddrescueview'),
-    (1330, 'html-xml-utils'),
-    (16891, 'fred'),
-    (16890, 'H2rename'),
-    (16889, 'chntpw'),
-    ]
+PROGRAMS = ['tcpflow', 'ddrescueview', 'html-xml-utils', 'fred', 'H2rename', 'chntpw']
+ANITYA_SEARCH_URL = 'https://release-monitoring.org/projects/search/?pattern=%s'
+ANITYA_PROJECT_REGEX = 'https://release-monitoring.org/project/([0-9]+)'
+
+
+def anitya_find_project_id(proj_name):
+    search_url = ANITYA_SEARCH_URL % proj_name
+    search = requests.get(search_url)
+    if search.url == search_url:
+        print("No exact match found for %s." % proj_name, file=sys.stderr)
+        return None
+    else:
+        return int(re.match(ANITYA_PROJECT_REGEX, search.url).groups()[0])
 
 def main():
     versions = []
-    for prog_id, prog_name in PROGRAMS:
+    for prog_name in PROGRAMS:
+        prog_id = anitya_find_project_id(proj_name=prog_name)
         res = requests.get('https://release-monitoring.org/project/%d/' % prog_id)
         res.raise_for_status()
         lines = res.text.splitlines()
