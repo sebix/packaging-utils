@@ -1,0 +1,10 @@
+__pycache__/
+*.bak
+*.swp
+*.pyc
+*.log
+*.*~
+packaging_utils.egg-info/
+build
+dist
+*~
