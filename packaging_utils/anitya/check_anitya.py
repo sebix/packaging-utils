@@ -25,10 +25,16 @@ def anitya_find_project_id(proj_name: str) -> Optional[int]:
     search_url = ANITYA_SEARCH_URL % proj_name
     search = requests.get(search_url)
     if search.url == search_url:
-        print("No exact or more than one match found for %s. Have a look at %r."
-              "" % (proj_name, search.url), file=sys.stderr)
-        return None
-    return int(re.match(ANITYA_PROJECT_REGEX, search.url).groups()[0])
+        matches = re.findall('<a href="/project/([0-9]+)/">\s+%s\s+</a>' % proj_name,
+                             search.text)
+        if len(matches) == 1:
+            return int(matches[0])
+        else:
+            print("No exact or more than one match found for %s. Have a look at %r."
+                  "" % (proj_name, search.url), file=sys.stderr)
+            return None
+    else:
+        return int(re.match(ANITYA_PROJECT_REGEX, search.url).groups()[0])
 
 
 def do_project(project: str) -> Optional[Tuple[str, str, str]]:

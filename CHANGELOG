@@ -6,6 +6,7 @@ CHANGELOG
 
 ### check-anitya
 * parallelization
+* supports not redirected exact matches
 
 ### common
 * conversion:
