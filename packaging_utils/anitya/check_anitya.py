@@ -3,9 +3,10 @@
 Checks anitya (release-monitoring.org) for updates.
 """
 import argparse
+import concurrent.futures
 import re
 import sys
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import requests
 import tabulate
@@ -30,26 +31,37 @@ def anitya_find_project_id(proj_name: str) -> Optional[int]:
     return int(re.match(ANITYA_PROJECT_REGEX, search.url).groups()[0])
 
 
-def iter_projects(*projects: List[str]):
+def do_project(project: str) -> Optional[Tuple[str, str, str]]:
     """
-    Iterates over a list of projects and compares versions.
+    Query Anitya and zypper for current version.
     """
-    versions = []
-    for prog_name in projects:
-        prog_id = anitya_find_project_id(proj_name=prog_name)
-        if not prog_id:
-            continue
+    max_version = None
+    prog_id = anitya_find_project_id(proj_name=project)
+    if prog_id:
         res = requests.get('https://release-monitoring.org/project/%d/' % prog_id)
         res.raise_for_status()
         lines = res.text.splitlines()
-        max_version = None
         for line in lines:
             if "doap:revision" in line:
                 version = Version(line[line.find('>')+1:line.rfind('<')])
                 if max_version is None or version > max_version:
                     max_version = version
-        opensuse_version = zypper.package_version(prog_name)
-        versions.append((prog_name, '.'.join(max_version), '.'.join(opensuse_version)))
+    opensuse_version = zypper.package_version(project)
+    return (project,
+            str(max_version) if max_version else '',
+            str(opensuse_version) if opensuse_version else '')
+
+def iter_projects(*projects: List[str]):
+    """
+    Iterates over a list of projects and compares versions.
+    """
+    versions = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        get_ids = {executor.submit(do_project, prog_name): prog_name for prog_name in projects}
+        for future in concurrent.futures.as_completed(get_ids):
+            project_versions = future.result()
+            if project_versions:
+                versions.append(project_versions)
     if versions:
         print(tabulate.tabulate(versions, headers=('name', 'anitya', 'opensuse')))
 
