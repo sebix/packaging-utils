@@ -11,6 +11,7 @@ import requests
 import tabulate
 
 from ..common import config, zypper
+from ..common.conversion import Version
 
 ANITYA_SEARCH_URL = 'https://release-monitoring.org/projects/search/?pattern=%s'
 ANITYA_PROJECT_REGEX = 'https://release-monitoring.org/project/([0-9]+)'
@@ -44,7 +45,7 @@ def iter_projects(*projects: List[str]):
         max_version = None
         for line in lines:
             if "doap:revision" in line:
-                version = line[line.find('>')+1:line.rfind('<')].split('.')
+                version = Version(line[line.find('>')+1:line.rfind('<')])
                 if max_version is None or version > max_version:
                     max_version = version
         opensuse_version = zypper.package_version(prog_name)

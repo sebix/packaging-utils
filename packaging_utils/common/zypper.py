@@ -5,8 +5,10 @@ Common functions to deal with zypper.
 import subprocess
 from typing import Optional
 
+from .conversion import Version
 
-def package_version(package_name: str) -> Optional[str]:
+
+def package_version(package_name: str) -> Optional[Version]:
     """
     Returns version of package as reported by `zypper info`.
     """
@@ -14,8 +16,4 @@ def package_version(package_name: str) -> Optional[str]:
                             stdout=subprocess.PIPE)
     for line in result.stdout.splitlines():
         if line.startswith(b'Version'):
-            version = line[line.find(b':')+2:line.find(b'-')].decode().split('.')
-            break
-    if not version:
-        return None
-    return version
+            return Version(line[line.find(b':')+2:line.find(b'-')].decode())
