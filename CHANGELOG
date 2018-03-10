@@ -1,6 +1,17 @@
 CHANGELOG
 =========
 
+2018-03-10
+----------
+
+### check-anitya
+* parallelization
+
+### common
+* conversion:
+ * add Version class for parsing and comparison
+ * add IntStr class for permissive conversions between int and str
+
 2018-02-26
 ----------
 
