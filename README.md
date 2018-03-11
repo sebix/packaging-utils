@@ -9,3 +9,4 @@ Tools
 -----
 
 * `check_anitya`: Checks latest version on anitya and compares it with locally available version.
+* `license_rewriter`: Rewrites specfiles to use %license macro.

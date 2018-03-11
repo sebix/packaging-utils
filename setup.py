@@ -39,6 +39,7 @@ setup(
     entry_points={
         'console_scripts': [
             'check-anitya = packaging_utils.anitya.check_anitya:main',
+            'license-rewriter = packaging_utils.specfile.license_rewriter:main',
         ],
     },
 )
