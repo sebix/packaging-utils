@@ -4,11 +4,11 @@ import os
 
 from setuptools import find_packages, setup
 
-with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as handle:
+with open(os.path.join(os.path.dirname(__file__), 'README.md')) as handle:
     README = handle.read()
 
 setup(
-    name='intelmq',
+    name='packaging_utils',
     version='0.1.0',
     maintainer='Sebastian Wagner',
     maintainer_email='sebix@sebix.at',

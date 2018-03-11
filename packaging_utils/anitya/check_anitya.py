@@ -57,6 +57,7 @@ def do_project(project: str) -> Optional[Tuple[str, str, str]]:
             str(max_version) if max_version else '',
             str(opensuse_version) if opensuse_version else '')
 
+
 def iter_projects(*projects: List[str]):
     """
     Iterates over a list of projects and compares versions.
