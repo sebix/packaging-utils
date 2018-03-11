@@ -42,4 +42,7 @@ setup(
             'license-rewriter = packaging_utils.specfile.license_rewriter:main',
         ],
     },
+    scripts=[
+        'scripts/branch-and-fix-license.sh',
+    ],
 )
