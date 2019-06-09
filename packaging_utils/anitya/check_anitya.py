@@ -50,7 +50,7 @@ def do_project(project: str) -> Optional[Tuple[str, str, str]]:
         for line in lines:
             if "doap:revision" in line:
                 version = Version(line[line.find('>')+1:line.rfind('<')])
-                if max_version is None or version > max_version:
+                if version and (max_version is None or version > max_version):
                     max_version = version
     opensuse_version = zypper.package_version(project)
     return (project,
