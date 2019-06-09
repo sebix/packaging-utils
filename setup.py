@@ -40,6 +40,7 @@ setup(
         'console_scripts': [
             'check-anitya = packaging_utils.anitya.check_anitya:main',
             'license-rewriter = packaging_utils.specfile.license_rewriter:main',
+            'changelog-extrator = packaging_utils.changelog_extractor.changelog_extrator:main',
         ],
     },
     scripts=[

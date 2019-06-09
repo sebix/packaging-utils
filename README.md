@@ -11,3 +11,4 @@ Tools
 * `check_anitya`: Checks latest version on anitya and compares it with locally available version.
 * `license_rewriter`: Rewrites specfiles to use %license macro.
 * `branch-and-fix-license`: Branches a package at the open build services, fixes %license and submits the packages
+* `changelog_extractor`: Extracts the changelog from a file in an archive, shows the changes sinnce the last version found in the changes file and converts it to the rpm format
