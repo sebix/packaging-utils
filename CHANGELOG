@@ -1,6 +1,18 @@
 CHANGELOG
 =========
 
+
+2019-06-09
+----------
+
+## Tests
+* Added for common.conversion.Version
+
+## Common
+* conversion.Version:
+  * denies text-only versions
+  * split also for dashes
+
 2018-03-11
 ----------
 

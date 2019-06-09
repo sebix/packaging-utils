@@ -6,6 +6,10 @@ import re
 from typing import Union, Optional
 
 
+SPLIT_PATTERN = re.compile(r'\.|-|~')
+ANY_INT_PATTERN = re.compile('[0-9]')
+
+
 def int_safe(value: str) -> Union[str, int]:
     """
     Returns int of string if possible, otherwise the original variable.
@@ -59,9 +63,14 @@ class Version(tuple):
             value = re.sub('^[a-z]*-?', '', value)
         original_value = value
         if isinstance(value, str):
-            value = tuple(int_safe(subval) for subval in value.split('.'))
+            value = tuple(int_safe(subval) for subval in SPLIT_PATTERN.split(value))
+
+        if not ANY_INT_PATTERN.search(str(value)):
+            return None
+
         new_class = super(Version, self).__new__(Version, value)
         new_class.original_value = original_value
+
         return new_class
 
     def __str__(self) -> str:

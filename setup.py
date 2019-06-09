@@ -45,4 +45,5 @@ setup(
     scripts=[
         'scripts/branch-and-fix-license.sh',
     ],
+    test_suite='tests',
 )
