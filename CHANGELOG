@@ -5,27 +5,34 @@ CHANGELOG
 2019-06-09
 ----------
 
-## Tests
+### Tests
 * Added for common.conversion.Version
 
-## Common
+### Common
 * conversion.Version:
   * denies text-only versions
   * split also for dashes
 
+### changelog extractor
+* Add support for axel, improve debian support
+* improve detection of changelog in tarballs
+
+### check-anitya
+* Ignore versions that can't be parsed.
+
 2019-06-02
 ----------
 
-## changelog extractor
+### changelog extractor
 * Added
 
 2018-03-11
 ----------
 
-## branch-and-fix-license
+### branch-and-fix-license
 * Added initial code
 
-## license_rewriter
+### license_rewriter
 * Added initial code
 
 2018-03-10
