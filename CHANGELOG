@@ -5,6 +5,9 @@ CHANGELOG
 2019-06-30
 ----------
 
+### Setup
+* remove classifier for 3.4, does not build there, not a relevant platform anyway
+
 ### Changelog extractor
 * Add generic rst conversion, tested with xarray, merged in xonsh
 * Add format detection based on filename
