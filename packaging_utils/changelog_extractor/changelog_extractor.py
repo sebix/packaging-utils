@@ -11,6 +11,7 @@ import sys
 import tarfile
 
 def convert_base(changelog, softwarename):
+    changelog = changelog.replace('\r\n', '\n')
     changelog = re.sub(r"^\.\. .*$", "", changelog, flags=re.MULTILINE) # some rst thing
     changelog = re.sub("^#? ?(%s )?change ?log.*$" % softwarename, "", changelog, count=0, flags=re.MULTILINE | re.IGNORECASE)
     return changelog
@@ -28,6 +29,9 @@ def convert_base_after(changelog, previous_version):
 
     if previous_version:
         changelog = changelog[:changelog.find("- update to version %s" % previous_version)]
+
+    # ornamental lines
+    changelog = re.sub(r"^[=~-]+$", "", changelog, flags=re.MULTILINE)
 
     return changelog.strip()
 
@@ -100,8 +104,27 @@ def convert_rst(changelog):
     changelog = re.sub("^  ", "    ", changelog, flags=re.MULTILINE)
     changelog = re.sub(r"^[-\*] (.*)$", r"  - \1", changelog, flags=re.MULTILINE)
 
-    # headings
-    changelog = re.sub(r"^[=~-]+$", "", changelog, flags=re.MULTILINE)
+    return changelog
+
+
+def convert_markdown(changelog):
+    """
+    Tested with spyder (-related) software only
+    """
+    # preface, everything until first header
+    changelog = re.sub(r"^(.*?)#", "#", changelog, flags=re.DOTALL)
+
+    # first heading
+    changelog = re.sub(r"^# History of changes$", "", changelog, flags=re.MULTILINE | re.IGNORECASE)
+
+    changelog = re.sub(r"^## (?:v|version )?([0-9\.]+) (.*)$", r"- update to version \1:", changelog,
+                       flags=re.MULTILINE | re.IGNORECASE)
+    changelog = re.sub(r"^### (.*):?$", r" - \1:", changelog, flags=re.MULTILINE)
+
+    # normal entries
+    changelog = re.sub(r"^  (.*)$", r"    \1", changelog, flags=re.MULTILINE)
+    changelog = re.sub(r"^\* (.*)$", r"  - \1", changelog, flags=re.MULTILINE)
+    changelog = re.sub(r"^(\w)(.*)$", r"  - \1\2", changelog, flags=re.MULTILINE)
     return changelog
 
 
@@ -109,6 +132,8 @@ STYLES = {
     # generic
     'debian': convert_debian,
     'keepachangelog': convert_keep_a_changelog,
+    'md': convert_markdown,
+    'markdown': convert_markdown,
     'rst': convert_rst,
     'textile': convert_textile,
     # specific
@@ -176,8 +201,10 @@ def main():
             args.style = 'debian'
         elif softwarename in STYLES:
             args.style = softwarename
-        elif candidate.endswith('rst'):
+        elif candidate.endswith('.rst'):
             args.style = 'rst'
+        elif candidate.endswith('.md'):
+            args.style = 'markdown'
         else:
             exit('Could not determine which conversion to use.')
         print('Using autodetected style %r' % args.style, file=sys.stderr)

@@ -10,6 +10,7 @@ CHANGELOG
 * Add format detection based on filename
 * Detect whats-new changelog files
 * Handle broken pipe errors gracefully
+* Generic markdown conversion
 
 2019-06-09
 ----------
