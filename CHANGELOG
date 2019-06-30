@@ -11,6 +11,10 @@ CHANGELOG
 * Detect whats-new changelog files
 * Handle broken pipe errors gracefully
 * Generic markdown conversion
+* Finish isort conversion
+
+### Tests
+* Added tests for changelog_extractor, rst conversion
 
 2019-06-09
 ----------

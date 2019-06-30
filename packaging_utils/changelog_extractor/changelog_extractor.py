@@ -33,13 +33,15 @@ def convert_base_after(changelog, previous_version):
     # ornamental lines
     changelog = re.sub(r"^[=~-]+$", "", changelog, flags=re.MULTILINE)
 
+    # empty lines
+    changelog = re.sub(r"\n{2,}", r"\n", changelog)
+
     return changelog.strip()
 
 
 def convert_isort(changelog):
-    # TOOD: Not complete
+    changelog = re.sub(r"^- (.*)$", r" - \1", changelog, flags=re.MULTILINE)
     changelog = re.sub(r"^### ([0-9\.]+) (.*)$", r"- update to version \1:", changelog, flags=re.MULTILINE)
-    changelog = re.sub(r"^=+$", "", changelog, flags=re.MULTILINE)
     return changelog
 
 
@@ -94,15 +96,15 @@ def convert_rst(changelog):
     # xarray preface until first verion (rst?)
     changelog = re.sub(r"^(.*?)\nv", "v", changelog, flags=re.DOTALL)
 
+    # normal entries
+    changelog = re.sub("^  ", "    ", changelog, flags=re.MULTILINE)
+    changelog = re.sub(r"^[-\*] (.*)$", r"  - \1", changelog, flags=re.MULTILINE)
+
     # versions, with or without date
     changelog = re.sub(r"^v([0-9\.]+)( \(.*?\))?$", r"- update to version \1:", changelog, flags=re.MULTILINE)
 
     # sections
     changelog = re.sub(r"^\*?\*?([A-Za-z]+.*?):?\*?\*?$", r" - \1:", changelog, flags=re.MULTILINE)
-
-    # normal entries
-    changelog = re.sub("^  ", "    ", changelog, flags=re.MULTILINE)
-    changelog = re.sub(r"^[-\*] (.*)$", r"  - \1", changelog, flags=re.MULTILINE)
 
     return changelog
 
@@ -171,15 +173,17 @@ def main():
 
     print("Found %r and %r of %s." % (archivefilename, changesfilename, softwarename), file=sys.stderr)
 
+    # Find previous version in changes file
     with open(changesfilename) as changes:
         while True:
             line = changes.readline()
             previous_version = re.search('[0-9]+\.[0-9]+(\.[0-9]+)?', line)
-            if line.startswith ('- update') and previous_version:
+            if re.match('^- (version )?update( to)?( version)?', line) and previous_version:
                 previous_version = previous_version[0]
                 break
         print("Found previous version %s" % previous_version, file=sys.stderr)
 
+    # find and read changelog from archive
     if archivefilename != '<stdin>':
         with tarfile.open(archivefilename, 'r') as archive:
             # find the changelog file with the smallest number of slashes in it's path
