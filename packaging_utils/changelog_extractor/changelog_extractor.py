@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+
+TODOs: Generic Markdown conversions
+"""
 import argparse
 import glob
 import re
@@ -26,14 +30,6 @@ def convert_base_after(changelog, previous_version):
         changelog = changelog[:changelog.find("- update to version %s" % previous_version)]
 
     return changelog.strip()
-
-def convert_xonsh(changelog):
-    changelog = re.sub(r"\*\*([A-Za-z]+:)\*\*", r" - \1", changelog, flags=re.MULTILINE)
-    changelog = re.sub("^  ", "    ", changelog, flags=re.MULTILINE)
-    changelog = re.sub(r"^[-\*] (.*)$", r"  - \1", changelog, flags=re.MULTILINE)
-    changelog = re.sub(r"^v([0-9\.]+)$", r"- update to version \1:", changelog, flags=re.MULTILINE)
-    changelog = re.sub(r"^=+$", "", changelog, flags=re.MULTILINE)
-    return changelog
 
 
 def convert_isort(changelog):
@@ -75,19 +71,57 @@ def convert_axel(changelog):
     return changelog
 
 
+def convert_rst(changelog):
+    """
+    Generic RST conversion
+
+    Xarray:
+    ignore everything until the first version
+    headers:
+    v0.12.2 (29 June 2019)
+    ----------------------
+
+    New functions/methods
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    Xonsh headers:
+    **Header:**
+    """
+    # xarray preface until first verion (rst?)
+    changelog = re.sub(r"^(.*?)\nv", "v", changelog, flags=re.DOTALL)
+
+    # versions, with or without date
+    changelog = re.sub(r"^v([0-9\.]+)( \(.*?\))?$", r"- update to version \1:", changelog, flags=re.MULTILINE)
+
+    # sections
+    changelog = re.sub(r"^\*?\*?([A-Za-z]+.*?):?\*?\*?$", r" - \1:", changelog, flags=re.MULTILINE)
+
+    # normal entries
+    changelog = re.sub("^  ", "    ", changelog, flags=re.MULTILINE)
+    changelog = re.sub(r"^[-\*] (.*)$", r"  - \1", changelog, flags=re.MULTILINE)
+
+    # headings
+    changelog = re.sub(r"^[=~-]+$", "", changelog, flags=re.MULTILINE)
+    return changelog
+
+
 STYLES = {
-    'xonsh': convert_xonsh,
-    'isort': convert_isort,
-    'keepachangelog': convert_keep_a_changelog,
+    # generic
     'debian': convert_debian,
+    'keepachangelog': convert_keep_a_changelog,
+    'rst': convert_rst,
     'textile': convert_textile,
+    # specific
+    'isort': convert_isort,
     'axel': convert_axel,
+    'xonsh': convert_rst,
     }
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('style', nargs='?', default='isort')
+    parser.add_argument('style', nargs='?', default='automatic',
+                        choices=tuple(STYLES.keys()) + ('automatic', ))
     parser.add_argument('-v', '--verbose', action='store_const', const=True)
     args = parser.parse_args()
 
@@ -124,7 +158,7 @@ def main():
     if archivefilename != '<stdin>':
         with tarfile.open(archivefilename, 'r') as archive:
             # find the changelog file with the smallest number of slashes in it's path
-            candidates = list(filter(lambda filename: re.search('(changes|changelog|history)[^/]*', filename, flags=re.IGNORECASE), archive.getnames()))
+            candidates = list(filter(lambda filename: re.search('(changes|changelog|history|whats.new)[^/]*', filename, flags=re.IGNORECASE), archive.getnames()))
             if not candidates:
                 sys.exit('Found no changelog in archive :/')
             if args.verbose:
@@ -137,10 +171,24 @@ def main():
     else:
         changelog = sys.stdin.read()
 
+    if args.style == 'automatic':
+        if changesfilename.endswith('debian/changelog'):
+            args.style = 'debian'
+        elif softwarename in STYLES:
+            args.style = softwarename
+        elif candidate.endswith('rst'):
+            args.style = 'rst'
+        else:
+            exit('Could not determine which conversion to use.')
+        print('Using autodetected style %r' % args.style, file=sys.stderr)
+
     changelog = convert_base(changelog, softwarename)
     changelog = STYLES[args.style](changelog)
     changelog = convert_base_after(changelog, previous_version)
-    print(changelog)
+    try:
+        print(changelog)
+    except BrokenPipeError:
+        pass
 
 
 if __name__ == '__main__':
