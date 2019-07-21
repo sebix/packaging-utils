@@ -2,6 +2,16 @@ CHANGELOG
 =========
 
 
+2019-07-21
+----------
+
+### Changelog extractor
+* markdown: add support for shodan style (no ### headings)
+* markdown: harmonize headings to ATX-style
+
+### Tests
+* Added tests for changelog_extractor, rst conversion
+
 2019-06-30
 ----------
 
