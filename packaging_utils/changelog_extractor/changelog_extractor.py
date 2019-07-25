@@ -7,7 +7,7 @@ import re
 import select
 import sys
 import tarfile
-import subprocess
+
 
 def convert_base(changelog, softwarename):
     changelog = changelog.replace('\r\n', '\n')
@@ -138,6 +138,21 @@ def convert_markdown(changelog):
     return changelog
 
 
+def convert_misp(changelog, with_markdown=True):
+    """
+    Also has third-level headings with ~~~
+    """
+    # Indent all the list items
+    changelog = re.sub(r"^( .|-[^-])", r" \1", changelog, flags=re.MULTILINE)
+
+    # Normalize misp-special headers
+    changelog = re.sub(r"(\n|^)(.+?)\n~+\n", r"- \2\n", changelog)
+    if with_markdown:
+        return convert_markdown(changelog)
+    else:
+        return changelog
+
+
 STYLES = {
     # generic
     'debian': convert_debian,
@@ -150,6 +165,8 @@ STYLES = {
     'isort': convert_isort,
     'axel': convert_axel,
     'xonsh': convert_rst,
+    'misp': convert_misp,
+    'pymisp': convert_misp,
     }
 
 

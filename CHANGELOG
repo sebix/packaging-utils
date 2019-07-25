@@ -2,6 +2,16 @@ CHANGELOG
 =========
 
 
+2019-07-25
+----------
+
+### Changelog extractor
+* (Py)MISP support added
+
+### Tests
+* Added tests for the misp changelog extractor
+
+
 2019-07-21
 ----------
 
