@@ -231,7 +231,7 @@ def main():
         changelog = sys.stdin.read()
 
     if args.style == 'automatic':
-        if changesfilename.endswith('debian/changelog'):
+        if candidate.endswith('debian/changelog'):
             args.style = 'debian'
         elif softwarename in STYLES:
             args.style = softwarename
