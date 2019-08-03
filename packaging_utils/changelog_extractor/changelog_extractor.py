@@ -175,6 +175,7 @@ def main():
     parser.add_argument('style', nargs='?', default='automatic',
                         choices=tuple(STYLES.keys()) + ('automatic', ))
     parser.add_argument('-v', '--verbose', action='store_const', const=True)
+    parser.add_argument('-p', '--previous-version', help='Previous version string to use instead of extraction from *.changes file.')
     args = parser.parse_args()
 
     files = glob.glob("*.tar.*z")
@@ -189,24 +190,28 @@ def main():
     if select.select([sys.stdin,],[],[],0.0)[0]:  # stdin
         archivefilename = "<stdin>"
 
-    files = glob.glob("*.changes")
-    if not files:
-        sys.exit("No *.changes.* file found!")
-    elif len(files) > 1:
-        sys.exit("More than one *.changes.* file found!")
-    changesfilename = files[0]
+    if not args.previous_version:
+        files = glob.glob("*.changes")
+        if not files:
+            sys.exit("No *.changes.* file found!")
+        elif len(files) > 1:
+            sys.exit("More than one *.changes.* file found!")
+        changesfilename = files[0]
 
-    print("Found %r and %r of %s." % (archivefilename, changesfilename, softwarename), file=sys.stderr)
+    print("Found %r and %r of %s." % (archivefilename, args.previous_version or changesfilename, softwarename), file=sys.stderr)
 
-    # Find previous version in changes file
-    with open(changesfilename) as changes:
-        while True:
-            line = changes.readline()
-            previous_version = re.search('[0-9]+\.[0-9]+(\.[0-9]+)?', line)
-            if re.match('^- (version )?update( to)?( version)?', line) and previous_version:
-                previous_version = previous_version[0]
-                break
-        print("Found previous version %s" % previous_version, file=sys.stderr)
+    if not args.previous_version:
+        # Find previous version in changes file
+        with open(changesfilename) as changes:
+            while True:
+                line = changes.readline()
+                previous_version = re.search('[0-9]+\.[0-9]+(\.[0-9]+)?', line)
+                if re.match('^- (version )?update( to)?( version)?', line) and previous_version:
+                    previous_version = previous_version[0]
+                    break
+            print("Found previous version %s" % previous_version, file=sys.stderr)
+    else:
+        previous_version = args.previous_version
 
     # find and read changelog from archive
     if archivefilename != '<stdin>':
