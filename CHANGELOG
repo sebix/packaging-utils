@@ -9,6 +9,14 @@ CHANGELOG
 * More robust changes-file parsing / last version extraction.
 
 
+2019-08-03
+----------
+
+### Changelog extractor
+- optionally use previous version from parameter (#4)
+- Fix wrong variable name: detection of changelog filenames `debian/changelog` (#5)
+
+
 2019-07-25
 ----------
 
