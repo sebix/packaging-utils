@@ -200,12 +200,15 @@ def main():
 
     # Find previous version in changes file
     with open(changesfilename) as changes:
-        while True:
-            line = changes.readline()
+        line = changes.readline()
+        while line:
             previous_version = re.search('[0-9]+\.[0-9]+(\.[0-9]+)?', line)
-            if re.match('^- (version )?update( to)?( version)?', line) and previous_version:
+            if re.match('^- (version )?update( to)?( version)?', line, re.IGNORECASE) and previous_version:
                 previous_version = previous_version[0]
                 break
+            line = changes.readline()
+        else:
+            sys.exit("Could not determine the last mentioned version from the changes file.")
         print("Found previous version %s" % previous_version, file=sys.stderr)
 
     # find and read changelog from archive

@@ -2,6 +2,13 @@ CHANGELOG
 =========
 
 
+2019-08-09
+----------
+
+### Changelog extractor
+* More robust changes-file parsing / last version extraction.
+
+
 2019-07-25
 ----------
 
