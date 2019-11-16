@@ -39,7 +39,7 @@ shodan_expected = """
 """.strip()
 
 
-class TextXarray(unittest.TestCase):
+class TextMd(unittest.TestCase):
     maxDiff = None
     def test_conversion(self):
         self.assertEqual(convert_base_after(convert_markdown(convert_base(shodan_original,

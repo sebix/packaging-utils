@@ -153,6 +153,41 @@ def convert_misp(changelog, with_markdown=True):
         return changelog
 
 
+def convert_git(changelog):
+    """
+    Converts git logs.
+
+    Assumption: no empty lines without whitespace (seems to hold)
+    """
+    version_template = """
+    New release [].?([0-9\.]+)(.*)
+"""
+    strip_template = """commit [0-9A-Fa-f]{40}(
+Merge: [0-9A-Fa-f ]+)?
+Author: .*? <.*?>
+Date:   .*?
+"""
+    # remove git stuff
+    changelog = re.sub(strip_template, '', changelog)
+    # make first line of commit summary the list item
+    changelog = re.sub('\n\n    ', '\n - ', changelog)
+    # ensure we start with a list item
+    changelog = re.sub('^\n    ', ' - ', changelog)
+    # subsequent lines of commit summaries
+    changelog = re.sub("\n    \n    ", "\n   ", changelog, flags=re.MULTILINE)
+    changelog = re.sub("\n    ", "\n   ", changelog, flags=re.MULTILINE)
+    # merges
+    changelog = re.sub('^ - Merge branch \'.*?\' of .*?$', '', changelog,
+                       flags=re.IGNORECASE | re.MULTILINE)
+    # empty lines
+    changelog = re.sub(r"\n{2,}", r"\n", changelog)
+    # releases
+    changelog = re.sub("^ - (new )?release (of )?([a-z]+-)?([0-9\.]+?)([.:]*)$",
+                       r"- update to version \4:",
+                       changelog, flags=re.MULTILINE | re.IGNORECASE)
+    return changelog
+
+
 STYLES = {
     # generic
     'debian': convert_debian,
@@ -167,6 +202,7 @@ STYLES = {
     'xonsh': convert_rst,
     'misp': convert_misp,
     'pymisp': convert_misp,
+    'git': convert_git,
     }
 
 
@@ -242,6 +278,8 @@ def main():
             args.style = 'rst'
         elif candidate.endswith('.md'):
             args.style = 'markdown'
+        elif changelog.startswith('commit '):
+            args.style = 'git'
         else:
             exit('Could not determine which conversion to use.')
         print('Using autodetected style %r' % args.style, file=sys.stderr)
