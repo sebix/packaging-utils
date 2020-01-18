@@ -27,7 +27,7 @@ def convert_base_after(changelog, previous_version):
         changelog = re.sub(author_pattern + ".*?^( {,%d}-)" % spaces, r"\1", changelog, flags=re.IGNORECASE | re.MULTILINE | re.DOTALL)
 
     if previous_version:
-        changelog = changelog[:changelog.find("- update to version %s" % previous_version)]
+        changelog = changelog[:changelog.find("- update to version %s:" % previous_version)]
 
     # ornamental lines
     changelog = re.sub(r"^[=~-]+$", "", changelog, flags=re.MULTILINE)

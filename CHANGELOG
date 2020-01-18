@@ -2,6 +2,12 @@ CHANGELOG
 =========
 
 
+2020-01-18
+----------
+
+### Changelog extractor
+* Fix detection of previous version if version only get postfixes (like '2' and '2.1').
+
 2019-11-16
 ----------
 
