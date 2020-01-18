@@ -7,6 +7,7 @@ CHANGELOG
 
 ### Changelog extractor
 * Fix detection of previous version if version only get postfixes (like '2' and '2.1').
+* Fix conversion for pymisp: indentation missed one additional space.
 
 2019-11-16
 ----------

@@ -31,11 +31,11 @@ Changelog
 
 v2.4.111.2 (2019-07-22)
 -----------------------
-- New
- - [Sightings] Delete method. [Raphaël Vinot]
+ - New
+  - [Sightings] Delete method. [Raphaël Vinot]
 
-   Fix #230
- - [tests] non-exportable tags. [Raphaël Vinot]
+    Fix #230
+  - [tests] non-exportable tags. [Raphaël Vinot]
 """
 
 

@@ -143,10 +143,10 @@ def convert_misp(changelog, with_markdown=True):
     Also has third-level headings with ~~~
     """
     # Indent all the list items
-    changelog = re.sub(r"^( .|-[^-])", r" \1", changelog, flags=re.MULTILINE)
+    changelog = re.sub(r"^( .|-[^-])", r"  \1", changelog, flags=re.MULTILINE)
 
     # Normalize misp-special headers
-    changelog = re.sub(r"(\n|^)(.+?)\n~+\n", r"- \2\n", changelog)
+    changelog = re.sub(r"(\n|^)(.+?)\n~+\n", r" - \2\n", changelog)
     if with_markdown:
         return convert_markdown(changelog)
     else:
