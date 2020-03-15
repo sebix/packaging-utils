@@ -259,6 +259,8 @@ def main():
             candidates = list(filter(lambda filename: re.search('(changes|changelog|history|whats.new)[^/]*', filename, flags=re.IGNORECASE), archive.getnames()))
             if not candidates:
                 sys.exit('Found no changelog in archive :/')
+            # remove hidden files (in root directory and in subdirectories)
+            candidates = list(filter(lambda name: not re.search('(^\.|/\.)', name), candidates))
             if args.verbose:
                 print('Changelog candidates:\n*', '\n* '.join(candidates), file=sys.stderr)
             number_of_slashes = [filename.count('/') for filename in candidates]
