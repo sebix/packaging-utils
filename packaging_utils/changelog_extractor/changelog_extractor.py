@@ -63,8 +63,8 @@ def convert_textile(changelog):
 
 def convert_debian(changelog):
     changelog = re.sub(r"^ ", " ", changelog, flags=re.MULTILINE)
-    changelog = re.sub(r"^[^ ]+ \(([0-9\.-]+)\) .*?$", r"- update to version \1:", changelog, flags=re.MULTILINE)
-    changelog = re.sub(r"^-- .*?$", "", changelog, flags=re.MULTILINE)
+    changelog = re.sub(r"^[^ ]+ \(([0-9\.-]+)-(0ubuntu1)?\) .*?$", r"- update to version \1:", changelog, flags=re.MULTILINE)
+    changelog = re.sub(r"^ ?-- .*?$", "", changelog, flags=re.MULTILINE)
     return changelog
 
 
@@ -288,6 +288,7 @@ def main():
 
     changelog = convert_base(changelog, softwarename)
     changelog = STYLES[args.style](changelog)
+#    print(changelog[:200])
     changelog = convert_base_after(changelog, previous_version)
     try:
         print(changelog)

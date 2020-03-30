@@ -2,6 +2,11 @@ CHANGELOG
 =========
 
 
+2020-03-30
+----------
+### Changelog extractor
+* Debian conversion: Detect new style author lines and versions with postfixes.
+
 2020-03-15
 ----------
 
