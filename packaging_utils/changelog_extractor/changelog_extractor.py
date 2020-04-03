@@ -212,14 +212,19 @@ def main():
                         choices=tuple(STYLES.keys()) + ('automatic', ))
     parser.add_argument('-v', '--verbose', action='store_const', const=True)
     parser.add_argument('-p', '--previous-version', help='Previous version string to use instead of extraction from *.changes file.')
+    parser.add_argument('-a', '--archive', help='The code archive to use and search changelog for.',
+                        type=argparse.FileType('r'))
     args = parser.parse_args()
 
-    files = glob.glob("*.tar.*z")
-    if not files:
-        sys.exit("No *.tar.*z file found!")
-    elif len(files) != 1:
-        sys.exit("More than one *.tar.*z file found!")
-    archivefilename = files[0]
+    if not args.archive:
+        files = glob.glob("*.tar.*z")
+        if not files:
+            sys.exit("No *.tar.*z file found!")
+        elif len(files) != 1:
+            sys.exit("More than one *.tar.*z file found!")
+        archivefilename = files[0]
+    else:
+        archivefilename = args.archive.name
     softwarename = archivefilename[:archivefilename.rfind('-')]
     if softwarename.startswith('python-'):
         softwarename = softwarename[7:]

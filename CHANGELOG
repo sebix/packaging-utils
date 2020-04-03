@@ -2,6 +2,11 @@ CHANGELOG
 =========
 
 
+2020-04-02
+----------
+### Changelog extractor
+* Add parameter `--archive` to specify code archive as argument.
+
 2020-03-30
 ----------
 ### Changelog extractor
