@@ -9,11 +9,15 @@ import sys
 import tarfile
 
 
-def convert_base(changelog, softwarename):
+def convert_base(changelog, softwarename: str = '') -> str:
     changelog = changelog.replace('\r\n', '\n')
-    changelog = re.sub(r"^\.\. .*$", "", changelog, flags=re.MULTILINE) # some rst thing
+    # ignore rst blocks:
+    changelog = re.sub(r"^\.\. .*$", "", changelog, flags=re.MULTILINE)
+    # rst history header
+    changelog = re.sub(r"^=+\nhistory\n=+$", "", changelog, flags=re.MULTILINE | re.IGNORECASE)
     changelog = re.sub("^#? ?(%s )?change ?log.*$" % softwarename, "", changelog, count=0, flags=re.MULTILINE | re.IGNORECASE)
     return changelog
+
 
 def convert_base_after(changelog, previous_version):
     changelog = re.sub("\n(\s*\n)+", "\n", changelog)
@@ -29,7 +33,7 @@ def convert_base_after(changelog, previous_version):
     if previous_version:
         changelog = changelog[:changelog.find("- update to version %s:" % previous_version)]
 
-    # ornamental lines
+    # ornamental lines or heading leftovers
     changelog = re.sub(r"^[=~-]+$", "", changelog, flags=re.MULTILINE)
 
     # empty lines
@@ -95,12 +99,18 @@ def convert_rst(changelog):
     # xarray preface until first verion (rst?)
     changelog = re.sub(r"^(.*?)\nv", "v", changelog, flags=re.DOTALL)
 
-    # normal entries
-    changelog = re.sub("^  ", "    ", changelog, flags=re.MULTILINE)
-    changelog = re.sub(r"^[-\*] (.*)$", r"  - \1", changelog, flags=re.MULTILINE)
+
+    # normal list entries
+    # Are ~ headers used?
+    if re.search('[a-z0-9]\n~+\n', changelog, flags=re.MULTILINE | re.IGNORECASE):
+        changelog = re.sub("^  ", "    ", changelog, flags=re.MULTILINE)
+        changelog = re.sub(r"^[-\*] (.*)$", r"  - \1", changelog, flags=re.MULTILINE)
+    else:
+        changelog = re.sub("^ ", "  ", changelog, flags=re.MULTILINE)
+        changelog = re.sub(r"^[-\*] (.*)$", r" - \1", changelog, flags=re.MULTILINE)
 
     # versions, with or without date
-    changelog = re.sub(r"^v([0-9\.]+)( \(.*?\))?$", r"- update to version \1:", changelog, flags=re.MULTILINE)
+    changelog = re.sub(r"^v?([0-9\.]+)( \(.*?\))?$", r"- update to version \1:", changelog, flags=re.MULTILINE)
 
     # sections
     changelog = re.sub(r"^\*?\*?([A-Za-z]+.*?):?\*?\*?$", r" - \1:", changelog, flags=re.MULTILINE)

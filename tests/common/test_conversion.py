@@ -2,6 +2,7 @@ import unittest
 
 from packaging_utils.common.conversion import Version
 
+
 class TestVersion(unittest.TestCase):
     def test_alpha_only(self):
         self.assertIsNone(Version('disable-globalcfg'))

@@ -98,13 +98,54 @@ xarray_expected = """
     By `Andras Gefferth <https://github.com/kefirbandi>`_.
 """.strip()
 
-expected = """
+time_machine = """
+=======
+History
+=======
 
+2.2.0 (2021-07-02)
+------------------
+
+* Include type hints.
+
+* Convert C module to use PEP 489 multi-phase extension module initialization.
+  This makes the module ready for Python sub-interpreters.
+
+* Release now includes a universal2 wheel for Python 3.9 on macOS, to work on
+  Apple Silicon.
+
+* Stop distributing tests to reduce package size. Tests are not intended to be
+  run outside of the tox setup in the repository. Repackagers can use GitHub's
+  tarballs per tag.
+
+2.1.0 (2021-02-19)
+------------------
+
+* Release now includes wheels for ARM on Linux.
 """.strip()
 
-class TextXarray(unittest.TestCase):
-    def test_conversion(self):
+time_machine_expected = """
+- update to version 2.2.0:
+ - Include type hints.
+ - Convert C module to use PEP 489 multi-phase extension module initialization.
+   This makes the module ready for Python sub-interpreters.
+ - Release now includes a universal2 wheel for Python 3.9 on macOS, to work on
+   Apple Silicon.
+ - Stop distributing tests to reduce package size. Tests are not intended to be
+   run outside of the tox setup in the repository. Repackagers can use GitHub's
+   tarballs per tag.
+""".strip()
+
+
+class TextRst(unittest.TestCase):
+    def test_xarray(self):
         self.assertEqual(convert_base_after(convert_rst(convert_base(xarray_original,
                                                                      'xarray')),
                                             '0.12.0'),
                          xarray_expected)
+
+    def test_time_machine(self):
+        self.assertEqual(convert_base_after(convert_rst(convert_base(time_machine,
+                                                                     'time-machine')),
+                                            '2.1.0'),
+                         time_machine_expected)
