@@ -21,3 +21,10 @@ def read_config(section: str) -> Optional[str]:
         return config[section]
     else:
         return config
+
+
+def get_librariesio_api_key() -> Optional[str]:
+    """
+    Returns the libraries.io API key
+    """
+    return read_config('libraries.io')['api_key']

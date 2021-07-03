@@ -40,6 +40,7 @@ setup(
             'check-anitya = packaging_utils.anitya.check_anitya:main',
             'license-rewriter = packaging_utils.specfile.license_rewriter:main',
             'changelog-extractor= packaging_utils.changelog_extractor.changelog_extractor:main',
+            'librariesio-latest-version = packaging_utils.librariesio.get_latest_version:main',
         ],
     },
     scripts=[

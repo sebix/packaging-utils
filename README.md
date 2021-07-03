@@ -12,8 +12,18 @@ Tools
 * `license_rewriter`: Rewrites RPM specfiles to use %license macro (not needed anymore).
 * `branch-and-fix-license`: Branches a package at the OpenBuildService, fixes %license and submits the packages (not needed anymore).
 * `changelog_extractor`: Extracts the changelog from a file in an archive, shows the changes sinnce the last version found in the changes file and converts it to the RPM changelog format.
+* `librariesio-latest-version`: Retrieves the latest version from libraries.io (currently only PyPI is supported) for the given software. The name of the software can be detected from the current working directory.
 
 Configuration
 -------------
 
 Some scripts require a configuration. The file used is `.config/packaging_utils.ini`.
+
+### For `librariesio-latest-version`
+
+You can get your API key here: https://libraries.io/account
+
+```ini
+[libraries.io]
+api_key = INSERT API KEY HERE
+```

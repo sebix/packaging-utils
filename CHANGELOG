@@ -4,11 +4,17 @@ CHANGELOG
 
 2021-07-03
 ----------
+### Base
+* Rewrite config file parser to single file.
+* New file `helpers` in common directory to detect the software name.
+
+### Libraries.io latest version
+* New script to fetch latest version of a software from libraries.io.
+
 ### Changelog extractor
 * Add support for time-machine changelogs (rst).
 * Tests: add tests for base.
 * Add support for passivetotal changelogs (markdown).
-* Rewrite config file parser to single file.
 
 2020-04-02
 ----------
