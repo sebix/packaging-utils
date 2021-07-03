@@ -39,10 +39,55 @@ shodan_expected = """
 """.strip()
 
 
+passivetotal = """
+## v2.5.1
+
+#### Enhancements
+
+- Adds support for the Illuminate CTI module with Intel Profile API library
+  calls and `analzyer` objects. Includes support for all API parameters and
+  handles pagination automatically.
+
+#### Bug Fixes
+
+- Filter methods on RecordList objects now consistently return lists instead of
+  filters.
+
+
+## v2.5.0
+
+#### Enhancements:
+
+- Raise `AnalyzerAPIError` when a non-200 response is returned from the API.
+""".strip()
+passivetotal_expected = """
+- update to version 2.5.1:
+ - Enhancements:
+  - Adds support for the Illuminate CTI module with Intel Profile API library
+    calls and `analzyer` objects. Includes support for all API parameters and
+    handles pagination automatically.
+ - Bug Fixes:
+  - Filter methods on RecordList objects now consistently return lists instead of
+    filters.
+- update to version 2.5.0:
+ - Enhancements:
+  - Raise `AnalyzerAPIError` when a non-200 response is returned from the API.
+""".strip()
+
+
 class TextMd(unittest.TestCase):
     maxDiff = None
-    def test_conversion(self):
+
+    def test_shodan(self):
         self.assertEqual(convert_base_after(convert_markdown(convert_base(shodan_original,
-                                                                     'shodan')),
+                                                             'shodan')),
                                             '1.13.0'),
                          shodan_expected)
+
+    def test_passivetotal(self):
+        """
+        passivetotal has weird sectioning, skipping ###, let's just live with that.
+        Also, one time the section header has a trainling comma, the other has not.
+        """
+        self.assertEqual(convert_base_after(convert_markdown(passivetotal)),
+                         passivetotal_expected)

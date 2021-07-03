@@ -135,15 +135,17 @@ def convert_markdown(changelog):
 
     changelog = re.sub(r"^## (?:v|version )?([0-9\.]+)(.*)$", r"- update to version \1:", changelog,
                        flags=re.MULTILINE | re.IGNORECASE)
-    if "\n###" in changelog:
-        changelog = re.sub(r"^### (.*):?$", r" - \1:", changelog, flags=re.MULTILINE)
+    if "\n### " in changelog or ("\n#### " in changelog and "\n### " not in changelog):
+        changelog = re.sub(r"^#{3,4} (.*?):?$", r" - \1:", changelog, flags=re.MULTILINE)
+        # '(.*?)' must be non-greedy because of the optional colon at the end
         default_whitespace_prefix = "  "
     else:
         default_whitespace_prefix = " "
 
     # normal entries
     changelog = re.sub(r"^  (.*)$", r"%s  \1" % default_whitespace_prefix, changelog, flags=re.MULTILINE)
-    changelog = re.sub(r"^\* (.*)$", r"%s- \1" % default_whitespace_prefix, changelog, flags=re.MULTILINE)
+    # translate all normal entries, except for the "- update to version" lines
+    changelog = re.sub(r"^[\*-] ((?!update to version).*)$", r"%s- \1" % default_whitespace_prefix, changelog, flags=re.MULTILINE)
     changelog = re.sub(r"^(\w)(.*)$", r"%s- \1\2" % default_whitespace_prefix, changelog, flags=re.MULTILINE)
     return changelog
 
