@@ -16,4 +16,4 @@ def package_version(package_name: str) -> Optional[Version]:
                             stdout=subprocess.PIPE)
     for line in result.stdout.splitlines():
         if line.startswith(b'Version'):
-            return Version(line[line.find(b':')+2:line.find(b'-')].decode())
+            return Version(line[line.find(b':') + 2:line.find(b'-')].decode())

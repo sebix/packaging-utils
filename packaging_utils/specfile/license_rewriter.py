@@ -7,12 +7,12 @@ import re
 import sys
 
 
-LICENSE_MATCH = re.compile('((copying|licenses?(/[^\s]*)?)(.(md|rst|txt))?)',
+LICENSE_MATCH = re.compile(r'((copying|licenses?(/[^\s]*)?)(.(md|rst|txt))?)',
                            flags=re.IGNORECASE)
-EMPTY_DOC = re.compile('^%doc\s*$')
+EMPTY_DOC = re.compile(r'^%doc\s*$')
 
 
-def fix_license(filename: str, dry_run: bool=False):
+def fix_license(filename: str, dry_run: bool = False):
     """
     Reads and writes the filename inserting %license.
     """
@@ -26,9 +26,9 @@ def fix_license(filename: str, dry_run: bool=False):
     if not doc_lines:
         print('No %doc lines found. Aborting', file=sys.stderr)
         return 2
-    licenses =[]
+    licenses = []
     for doc_line in doc_lines:
-        doc_line_split = re.split('\s+', lines[doc_line])
+        doc_line_split = re.split(r'\s+', lines[doc_line])
         new_doc_line = []
         old_license_count = len(licenses)
         for doc_line_fragment in doc_line_split:
@@ -47,12 +47,11 @@ def fix_license(filename: str, dry_run: bool=False):
         print('No license found. Aborting.', file=sys.stderr)
         return 2
     print('Licenses found:', ' '.join(licenses))
-    lines.insert(doc_line+1,
+    lines.insert(doc_line + 1,
                  '%license' + (' %s' * len(licenses)) % tuple(licenses))
     with open(filename, 'wt') as new_handle:
         new_handle.write('\n'.join(lines))
     return 0
-
 
 
 def main():
