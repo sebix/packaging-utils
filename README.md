@@ -13,13 +13,14 @@ Tools
 * `branch-and-fix-license`: Branches a package at the OpenBuildService, fixes %license and submits the packages (not needed anymore).
 * `changelog_extractor`: Extracts the changelog from a file in an archive, shows the changes sinnce the last version found in the changes file and converts it to the RPM changelog format.
 * `librariesio-latest-version`: Retrieves the latest version from libraries.io (currently only PyPI is supported) for the given software. The name of the software can be detected from the current working directory.
+* `specfile-version-updater`: Updates the version in the spec file, remove the old tarball and add the new one.
 
 Configuration
 -------------
 
 Some scripts require a configuration. The file used is `.config/packaging_utils.ini`.
 
-### For `librariesio-latest-version`
+### For `librariesio-latest-version` / `specfile-version-updater`
 
 You can get your API key here: https://libraries.io/account
 

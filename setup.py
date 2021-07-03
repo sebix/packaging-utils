@@ -41,6 +41,7 @@ setup(
             'license-rewriter = packaging_utils.specfile.license_rewriter:main',
             'changelog-extractor= packaging_utils.changelog_extractor.changelog_extractor:main',
             'librariesio-latest-version = packaging_utils.librariesio.get_latest_version:main',
+            'specfile-version-updater = packaging_utils.specfile.version_updater:main',
         ],
     },
     scripts=[

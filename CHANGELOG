@@ -8,6 +8,9 @@ CHANGELOG
 * Rewrite config file parser to single file.
 * New file `helpers` in common directory to detect the software name.
 
+### Specfile Versio Updater
+* New script to update the version in the spec file, remove the old tarball and add the new one.
+
 ### Libraries.io latest version
 * New script to fetch latest version of a software from libraries.io.
 
