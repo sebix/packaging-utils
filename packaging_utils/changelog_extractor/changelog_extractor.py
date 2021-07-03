@@ -8,8 +8,10 @@ import select
 import sys
 import tarfile
 
+from typing import Optional
 
-def convert_base(changelog, softwarename: str = '') -> str:
+
+def convert_base(changelog: str, softwarename: str = '') -> str:
     changelog = changelog.replace('\r\n', '\n')
     # ignore rst blocks:
     changelog = re.sub(r"^\.\. .*$", "", changelog, flags=re.MULTILINE)
@@ -19,8 +21,8 @@ def convert_base(changelog, softwarename: str = '') -> str:
     return changelog
 
 
-def convert_base_after(changelog, previous_version):
-    changelog = re.sub("\n(\s*\n)+", "\n", changelog)
+def convert_base_after(changelog: str, previous_version: Optional[str] = None):
+    changelog = re.sub(r"\n(\s*\n)+", "\n", changelog)
 
     author_pattern = "^[^a-z]*authors?:?"
     # find authors section:
@@ -42,13 +44,13 @@ def convert_base_after(changelog, previous_version):
     return changelog.strip()
 
 
-def convert_isort(changelog):
+def convert_isort(changelog: str):
     changelog = re.sub(r"^- (.*)$", r" - \1", changelog, flags=re.MULTILINE)
     changelog = re.sub(r"^### ([0-9\.]+) (.*)$", r"- update to version \1:", changelog, flags=re.MULTILINE)
     return changelog
 
 
-def convert_keep_a_changelog(changelog):
+def convert_keep_a_changelog(changelog: str):
     changelog = re.sub(r"^(.*?)#", "#", changelog, flags=re.DOTALL)
     changelog = re.sub(r"^## \[v([0-9\.]+)\] (.*)$", r"- update to version \1:", changelog, flags=re.MULTILINE)
     changelog = re.sub(r"^## \[unreleased\]$", "", changelog, flags=re.MULTILINE | re.IGNORECASE)
@@ -57,7 +59,7 @@ def convert_keep_a_changelog(changelog):
     return changelog
 
 
-def convert_textile(changelog):
+def convert_textile(changelog: str):
     changelog = re.sub(r"^h2. Version ([0-9\.]+)$", r"- update to version \1:", changelog, flags=re.MULTILINE)
     changelog = re.sub(r"^h1.(.*)", "", changelog, flags=re.MULTILINE | re.IGNORECASE)
     changelog = re.sub(r"^\* (.*)$", r" - \1", changelog, flags=re.MULTILINE)
@@ -65,14 +67,14 @@ def convert_textile(changelog):
     return changelog
 
 
-def convert_debian(changelog):
+def convert_debian(changelog: str):
     changelog = re.sub(r"^ ", " ", changelog, flags=re.MULTILINE)
     changelog = re.sub(r"^[^ ]+ \(([0-9\.-]+)-(0ubuntu1)?\) .*?$", r"- update to version \1:", changelog, flags=re.MULTILINE)
     changelog = re.sub(r"^ ?-- .*?$", "", changelog, flags=re.MULTILINE)
     return changelog
 
 
-def convert_axel(changelog):
+def convert_axel(changelog: str):
     changelog = re.sub(r"^Version: ([0-9\.]+), [0-9-]{10}$", r"- update to version \1:", changelog, flags=re.MULTILINE)
     changelog = re.sub(r"^\* (.*)$", r" - \1", changelog, flags=re.MULTILINE)
     changelog = re.sub(r"^\    -(.*)$", r"  - \1", changelog, flags=re.MULTILINE)
@@ -80,7 +82,7 @@ def convert_axel(changelog):
     return changelog
 
 
-def convert_rst(changelog):
+def convert_rst(changelog: str):
     """
     Generic RST conversion
 
@@ -118,7 +120,7 @@ def convert_rst(changelog):
     return changelog
 
 
-def convert_markdown(changelog):
+def convert_markdown(changelog: str):
     """
     Tested with spyder (-related) software only
     """
@@ -165,7 +167,7 @@ def convert_misp(changelog, with_markdown=True):
         return changelog
 
 
-def convert_git(changelog):
+def convert_git(changelog: str):
     """
     Converts git logs.
 
@@ -232,15 +234,19 @@ def main():
         files = glob.glob("*.tar.*z")
         if not files:
             sys.exit("No *.tar.*z file found!")
-        elif len(files) != 1:
-            sys.exit("More than one *.tar.*z file found!")
+        elif len(files) > 1:
+            # Try to filter out all names without dots (indicating version numbers)
+            files = list(filter(lambda fname: re.search('[0-9]', fname), files))
+            if len(files) > 1 or not files:
+                print(files)
+                sys.exit("More than one *.tar.*z file found! Could not determine which one to use. Try '-a'.")
         archivefilename = files[0]
     else:
         archivefilename = args.archive.name
     softwarename = archivefilename[:archivefilename.rfind('-')]
     if softwarename.startswith('python-'):
         softwarename = softwarename[7:]
-    if select.select([sys.stdin,],[],[],0.0)[0]:  # stdin
+    if select.select([sys.stdin, ], [], [], 0.0)[0]:  # stdin
         archivefilename = "<stdin>"
 
     if not args.previous_version:
