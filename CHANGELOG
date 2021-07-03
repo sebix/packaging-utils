@@ -8,6 +8,7 @@ CHANGELOG
 * Add support for time-machine changelogs (rst).
 * Tests: add tests for base.
 * Add support for passivetotal changelogs (markdown).
+* Rewrite config file parser to single file.
 
 2020-04-02
 ----------
