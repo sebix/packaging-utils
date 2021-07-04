@@ -2,6 +2,12 @@ CHANGELOG
 =========
 
 
+2021-07-04
+----------
+### Changelog extractor
+* Markdown: Support for isort
+* Removed isort-flavor
+
 2021-07-03
 ----------
 ### Base

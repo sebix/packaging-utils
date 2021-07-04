@@ -74,6 +74,26 @@ passivetotal_expected = """
   - Raise `AnalyzerAPIError` when a non-200 response is returned from the API.
 """.strip()
 
+isort = """
+Changelog
+=========
+
+NOTE: isort follows the [semver](https://semver.org/) versioning standard.
+Find out more about isort's release policy [here](https://pycqa.github.io/isort/docs/major_releases/release_policy).
+
+### 5.9.1 June 21st 2021 [hotfix]
+  - Fixed #1758: projects with many files and skip_ignore set can lead to a command-line overload.
+
+### 5.9.0 June 21st 2021
+  - Improved CLI startup time.
+""".strip()
+isort_expected = """
+- update to version 5.9.1:
+   - Fixed #1758: projects with many files and skip_ignore set can lead to a command-line overload.
+- update to version 5.9.0:
+   - Improved CLI startup time.
+""".strip()
+
 
 class TextMd(unittest.TestCase):
     maxDiff = None
@@ -91,3 +111,11 @@ class TextMd(unittest.TestCase):
         """
         self.assertEqual(convert_base_after(convert_markdown(passivetotal)),
                          passivetotal_expected)
+
+    def test_isort(self):
+        """
+        Test isort changelog
+        Let's ignore the whitespace before the - list specifiers
+        """
+        self.assertEqual(convert_base_after(convert_markdown(convert_base(isort, 'isort'))),
+                         isort_expected)

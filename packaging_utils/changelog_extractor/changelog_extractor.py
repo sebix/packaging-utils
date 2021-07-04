@@ -11,6 +11,9 @@ import tarfile
 from typing import Optional
 
 
+VERSION_REGEX = "(?:v|version )?([0-9\.]+)(.*)"
+
+
 def convert_base(changelog: str, softwarename: str = '') -> str:
     changelog = changelog.replace('\r\n', '\n')
     # ignore rst blocks:
@@ -42,12 +45,6 @@ def convert_base_after(changelog: str, previous_version: Optional[str] = None):
     changelog = re.sub(r"\n{2,}", r"\n", changelog)
 
     return changelog.strip()
-
-
-def convert_isort(changelog: str):
-    changelog = re.sub(r"^- (.*)$", r" - \1", changelog, flags=re.MULTILINE)
-    changelog = re.sub(r"^### ([0-9\.]+) (.*)$", r"- update to version \1:", changelog, flags=re.MULTILINE)
-    return changelog
 
 
 def convert_keep_a_changelog(changelog: str):
@@ -132,11 +129,15 @@ def convert_markdown(changelog: str):
     # preface, everything until first header
     changelog = re.sub(r"^(.*?)#", "#", changelog, flags=re.DOTALL)
 
-    # first heading
-    changelog = re.sub(r"^# History of changes$", "", changelog, flags=re.MULTILINE | re.IGNORECASE)
+    changelog, version_replacements = re.subn(r"^## %s$" % VERSION_REGEX, r"- update to version \1:",
+                                              changelog,
+                                              flags=re.MULTILINE | re.IGNORECASE)
+    if not version_replacements:
+        # try with ### heading
+        changelog = re.sub(r"^### %s$" % VERSION_REGEX, r"- update to version \1:",
+                           changelog,
+                           flags=re.MULTILINE | re.IGNORECASE)
 
-    changelog = re.sub(r"^## (?:v|version )?([0-9\.]+)(.*)$", r"- update to version \1:", changelog,
-                       flags=re.MULTILINE | re.IGNORECASE)
     if "\n### " in changelog or ("\n#### " in changelog and "\n### " not in changelog):
         changelog = re.sub(r"^#{3,4} (.*?):?$", r" - \1:", changelog, flags=re.MULTILINE)
         # '(.*?)' must be non-greedy because of the optional colon at the end
@@ -211,7 +212,6 @@ STYLES = {
     'rst': convert_rst,
     'textile': convert_textile,
     # specific
-    'isort': convert_isort,
     'axel': convert_axel,
     'xonsh': convert_rst,
     'misp': convert_misp,
@@ -279,7 +279,7 @@ def main():
     if archivefilename != '<stdin>':
         with tarfile.open(archivefilename, 'r') as archive:
             # find the changelog file with the smallest number of slashes in it's path
-            candidates = list(filter(lambda filename: re.search('(changes|changelog|history|whats.new)[^/]*', filename, flags=re.IGNORECASE), archive.getnames()))
+            candidates = list(filter(lambda filename: re.search('(changes|changelog|history(of changes)?|whats.new)[^/]*', filename, flags=re.IGNORECASE), archive.getnames()))
             if not candidates:
                 sys.exit('Found no changelog in archive :/')
             # remove hidden files (in root directory and in subdirectories)
