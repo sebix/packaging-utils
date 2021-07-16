@@ -13,6 +13,10 @@ CHANGELOG
 ### Common
 * Software name detection: handle the 'python3-' prefix as well.
 
+### Changelog extractor
+* Also detect "NEWS" files.
+* Check if the changelog candidates are files.
+
 2021-07-04
 ----------
 ### Changelog extractor

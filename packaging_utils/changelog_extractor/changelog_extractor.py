@@ -278,14 +278,18 @@ def main():
     # find and read changelog from archive
     if archivefilename != '<stdin>':
         with tarfile.open(archivefilename, 'r') as archive:
-            # find the changelog file with the smallest number of slashes in it's path
-            candidates = list(filter(lambda filename: re.search('(changes|changelog|history(of changes)?|whats.new)[^/]*', filename, flags=re.IGNORECASE), archive.getnames()))
+            # get a list of files matching the pattern
+            candidates = list(filter(lambda filename: re.search('(changes|changelog|history(of changes)?|whats.new|news)[^/]*$',
+                                                                filename,
+                                                                flags=re.IGNORECASE),
+                                     [member.name for member in archive.getmembers() if member.isfile()]))
             if not candidates:
                 sys.exit('Found no changelog in archive :/')
             # remove hidden files (in root directory and in subdirectories)
             candidates = list(filter(lambda name: not re.search('(^\.|/\.)', name), candidates))
             if args.verbose:
                 print('Changelog candidates:\n*', '\n* '.join(candidates), file=sys.stderr)
+            # find the changelog file with the smallest number of slashes in it's path
             number_of_slashes = [filename.count('/') for filename in candidates]
             smallest = min(number_of_slashes)
             candidate = list(candidates)[list(number_of_slashes).index(smallest)]
