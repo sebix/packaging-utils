@@ -7,6 +7,9 @@ CHANGELOG
 ### Specfile
 * Rewrite version detection to regex instead of rpmspec.
 
+### libraries.io latest version
+* Handle error when library is not found with error message.
+
 2021-07-04
 ----------
 ### Changelog extractor

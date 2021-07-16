@@ -13,11 +13,14 @@ import requests
 
 def get_latest_version(softwarename: str):
     """
-    Retrieves the lates version number from libraries.io
+    Retrieves the latest version number from libraries.io
     """
     api_key = get_librariesio_api_key()
     response = requests.get(f'https://libraries.io/api/pypi/{softwarename}?api_key={api_key}')
-    return response.json()['latest_release_number']
+    try:
+        return response.json()['latest_release_number']
+    except KeyError:
+        raise ValueError(f'Unable to retrieve the latest version number for {softwarename}.')
 
 
 def main():
