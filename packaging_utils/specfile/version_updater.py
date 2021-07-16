@@ -10,10 +10,8 @@ from pathlib import Path
 from subprocess import run
 
 from ..common.helpers import detect_softwarename
-from .helpers import detect_specfile, get_source_filename
+from .helpers import detect_specfile, get_source_filename, get_current_version, VERSION_MATCH
 from ..librariesio.get_latest_version import get_latest_version
-
-VERSION_MATCH = re.compile(r'^(Version:\s+)(.*?)$', flags=re.MULTILINE)
 
 
 def version_updater(softwarename: str, softwareversion: str):
@@ -21,7 +19,13 @@ def version_updater(softwarename: str, softwareversion: str):
     Updates the specfile, removes the old tarball, adds the new one
     """
     specfilename = detect_specfile()
+    current_version = get_current_version(specfilename)
+    if current_version == softwareversion:
+        print(f'No version change (specfile has {current_version}, latest/given is {softwareversion}). Nothing to do.')
+        return 2
+
     source_name = get_source_filename(specfilename)
+    print(f'deleting old source {source_name}')
     Path(source_name).unlink()
     with open(specfilename, 'r+') as specfile:
         newfile = VERSION_MATCH.sub(r'\g<1>%s' % softwareversion, specfile.read())
