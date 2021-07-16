@@ -9,9 +9,10 @@ import sys
 import tarfile
 
 from typing import Optional
+from itertools import compress
 
 
-VERSION_REGEX = "(?:v|version )?([0-9\.]+)(.*)"
+VERSION_REGEX = r"(?:v|version )?([0-9\.]+)(.*)"
 
 
 def convert_base(changelog: str, softwarename: str = '') -> str:
@@ -119,7 +120,7 @@ def convert_rst(changelog: str):
 
 def convert_markdown(changelog: str):
     """
-    Tested with spyder (-related) software only
+    Generic markdown conversion
     """
 
     # Normalize headings
@@ -129,27 +130,33 @@ def convert_markdown(changelog: str):
     # preface, everything until first header
     changelog = re.sub(r"^(.*?)#", "#", changelog, flags=re.DOTALL)
 
-    changelog, version_replacements = re.subn(r"^## %s$" % VERSION_REGEX, r"- update to version \1:",
-                                              changelog,
-                                              flags=re.MULTILINE | re.IGNORECASE)
-    if not version_replacements:
-        # try with ### heading
-        changelog = re.sub(r"^### %s$" % VERSION_REGEX, r"- update to version \1:",
-                           changelog,
-                           flags=re.MULTILINE | re.IGNORECASE)
-
-    if "\n### " in changelog or ("\n#### " in changelog and "\n### " not in changelog):
-        changelog = re.sub(r"^#{3,4} (.*?):?$", r" - \1:", changelog, flags=re.MULTILINE)
-        # '(.*?)' must be non-greedy because of the optional colon at the end
-        default_whitespace_prefix = "  "
+    for version_hash_count in range(1, 4):
+        prefix = '#' * version_hash_count
+        changelog, version_replacements = re.subn(fr"^{prefix} %s$" % VERSION_REGEX, r"- update to version \1:",
+                                                  changelog,
+                                                  flags=re.MULTILINE | re.IGNORECASE)
+        if version_replacements:
+            break
     else:
-        default_whitespace_prefix = " "
+        print('Unable to detect version headers.', file=sys.stderr)
+
+    # must be a tuple as used twice
+    headers = tuple('\n' + '#' * headers_hash_count for headers_hash_count in range(version_hash_count + 1, 7))
+    headers_used = tuple(header + ' ' in changelog for header in headers)
+    headers = tuple(compress(headers, headers_used))
+    # get rid of the heading newline
+    headers = map(str.strip, headers)
+    default_whitespace_prefix = ' ' * sum(headers_used)
+
+    for num_whitespaces, header in enumerate(headers):
+        whitespaces = ' ' * num_whitespaces
+        changelog = re.sub(fr"^{header} (.*?):?$", fr" {whitespaces}- \1:", changelog, flags=re.MULTILINE)
 
     # normal entries
-    changelog = re.sub(r"^  (.*)$", r"%s  \1" % default_whitespace_prefix, changelog, flags=re.MULTILINE)
+    changelog = re.sub(r"^  (.*)$", fr" {default_whitespace_prefix}  \1", changelog, flags=re.MULTILINE)
     # translate all normal entries, except for the "- update to version" lines
-    changelog = re.sub(r"^[\*-] ((?!update to version).*)$", r"%s- \1" % default_whitespace_prefix, changelog, flags=re.MULTILINE)
-    changelog = re.sub(r"^(\w)(.*)$", r"%s- \1\2" % default_whitespace_prefix, changelog, flags=re.MULTILINE)
+    changelog = re.sub(r"^[\*-] ((?!update to version).*)$", fr" {default_whitespace_prefix}- \1", changelog, flags=re.MULTILINE)
+    changelog = re.sub(r"^(\w)(.*)$", fr" {default_whitespace_prefix}- \1\2", changelog, flags=re.MULTILINE)
     return changelog
 
 

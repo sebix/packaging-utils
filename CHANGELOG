@@ -16,6 +16,7 @@ CHANGELOG
 ### Changelog extractor
 * Also detect "NEWS" files.
 * Check if the changelog candidates are files.
+* Better and more generic conversion for MarkDown.
 
 2021-07-04
 ----------

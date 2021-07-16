@@ -95,6 +95,48 @@ isort_expected = """
 """.strip()
 
 
+dateutil = """
+Version 2.8.2 (2021-07-08)
+==========================
+
+Data updates
+------------
+
+- Updated tzdata version to 2021a. (gh pr #1128)
+
+
+Bugfixes
+--------
+
+- Fixed a bug in the parser where non-``ValueError`` exceptions would be raised
+  during exception handling; this would happen, for example, if an
+  ``IllegalMonthError`` was raised in ``dateutil`` code. Fixed by Mark Bailey.
+  (gh issue #981, pr #987).
+
+
+Version 2.8.1 (2019-11-03)
+==========================
+
+Data updates
+------------
+
+- Updated tzdata version to 2019c.
+""".strip()
+dateutil_expected = """
+- update to version 2.8.2:
+ - Data updates:
+  - Updated tzdata version to 2021a. (gh pr #1128)
+ - Bugfixes:
+  - Fixed a bug in the parser where non-``ValueError`` exceptions would be raised
+    during exception handling; this would happen, for example, if an
+    ``IllegalMonthError`` was raised in ``dateutil`` code. Fixed by Mark Bailey.
+    (gh issue #981, pr #987).
+- update to version 2.8.1:
+ - Data updates:
+  - Updated tzdata version to 2019c.
+""".strip()
+
+
 class TextMd(unittest.TestCase):
     maxDiff = None
 
@@ -119,3 +161,11 @@ class TextMd(unittest.TestCase):
         """
         self.assertEqual(convert_base_after(convert_markdown(convert_base(isort, 'isort'))),
                          isort_expected)
+
+    def test_dateutil(self):
+        """
+        Test dateutil changelog
+        Uses first level headings for the versions.
+        """
+        self.assertEqual(convert_base_after(convert_markdown(convert_base(dateutil, 'dateutil'))),
+                         dateutil_expected)
