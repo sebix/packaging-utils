@@ -10,6 +10,9 @@ CHANGELOG
 ### libraries.io latest version
 * Handle error when library is not found with error message.
 
+### Common
+* Software name detection: handle the 'python3-' prefix as well.
+
 2021-07-04
 ----------
 ### Changelog extractor
