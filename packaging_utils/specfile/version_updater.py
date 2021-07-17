@@ -24,9 +24,10 @@ def version_updater(softwarename: str, softwareversion: str):
         print(f'No version change (specfile has {current_version}, latest/given is {softwareversion}). Nothing to do.')
         return 2
 
-    source_name = get_source_filename(specfilename)
-    print(f'deleting old source {source_name}')
-    Path(source_name).unlink()
+    source_names = get_source_filename(specfilename, current_version)
+    for source_name in source_names:
+        print(f'deleting old source {source_name}')
+        Path(source_name).unlink()
     with open(specfilename, 'r+') as specfile:
         newfile = VERSION_MATCH.sub(r'\g<1>%s' % softwareversion, specfile.read())
         specfile.seek(0)

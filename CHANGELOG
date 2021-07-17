@@ -2,6 +2,13 @@ CHANGELOG
 =========
 
 
+2021-07-17
+----------
+### Specfile
+* Helper: get_source_filename can handle multiple sources.
+* Helper: get_source_filename version argument is optional now.
+* Version updater: handle multiple sources.
+
 2021-07-16
 ----------
 ### Specfile

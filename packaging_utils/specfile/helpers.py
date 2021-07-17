@@ -7,9 +7,12 @@ import re
 import subprocess
 from pathlib import Path
 
+from typing import List, Optional
+
 
 VERSION_MATCH = re.compile(r'^(Version:\s+)(.*?)$', flags=re.MULTILINE)
 SOURCE_FILENAME = re.compile(r'Source[0-9]*:\s+(.*)', flags=re.IGNORECASE)
+SOURCE_VERSION_INDICATORS = ('%version', '%{version}', '%VERSION', '%{VERSION}')
 
 
 def detect_specfile() -> str:
@@ -27,7 +30,7 @@ def get_current_version(specfilename: str) -> str:
     return version
 
 
-def get_source_filename(specfilename) -> str:
+def get_source_filename(specfilename: str, version: Optional[str] = None) -> List[str]:
     """
     Querying the Source tag directly gives weird results. With mypy, Source0 and Source 99 exist.
     `rpmspec --srpm -q --qf "%{Source}" mypy.spec` gives the value of Source99
@@ -38,11 +41,22 @@ def get_source_filename(specfilename) -> str:
                             stdout=subprocess.PIPE)
     if result.stderr:
         raise ValueError(result.stderr)
+
+    if not version:
+        version = get_current_version(specfilename)
+
+    filenames = []
     for spec_line in result.stdout.decode().splitlines():
         source_name = SOURCE_FILENAME.match(spec_line)
-        if source_name:
-            url = source_name.group(1)
-            if '/' not in url:
-                return url
+        if not source_name:
+            continue
+        url = source_name.group(1)
+        if not any(marker in url for marker in SOURCE_VERSION_INDICATORS) and version not in url:
+            continue
+
+        if '/' not in url:
+            filenames.append(url)
+        else:
             slash = url.rfind('/')
-            return url[slash + 1:]
+            filenames.append(url[slash + 1:])
+    return filenames
