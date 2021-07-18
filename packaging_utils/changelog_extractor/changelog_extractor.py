@@ -66,9 +66,15 @@ def convert_textile(changelog: str):
 
 
 def convert_debian(changelog: str):
-    changelog = re.sub(r"^ ", " ", changelog, flags=re.MULTILINE)
-    changelog = re.sub(r"^[^ ]+ \(([0-9\.-]+)-(0ubuntu1)?\) .*?$", r"- update to version \1:", changelog, flags=re.MULTILINE)
+    # format: [packagename] ([versionumber]-[optionalrevision]) [irrelevant information]
+    changelog = re.sub(r"^[^ ]+ \(([0-9\.-]+)(-.*?)?\) .*?$", r"- update to version \1:", changelog, flags=re.MULTILINE)
+    # irrelevant author information: "  [ Author name ]""
+    changelog = re.sub(r"^  \[[^\]]+\]$", "", changelog, flags=re.MULTILINE)
+    # signatures
     changelog = re.sub(r"^ ?-- .*?$", "", changelog, flags=re.MULTILINE)
+    # list items
+    changelog = re.sub(r"^    (.+?)$", r"   \1", changelog, flags=re.MULTILINE)
+    changelog = re.sub(r"^  \* (.+?)$", r" - \1", changelog, flags=re.MULTILINE)
     return changelog
 
 
