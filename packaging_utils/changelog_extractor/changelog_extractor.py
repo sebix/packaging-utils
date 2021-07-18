@@ -269,13 +269,11 @@ def main():
     if not args.previous_version:
         # Find previous version in changes file
         with open(changesfilename) as changes:
-            line = changes.readline()
-            while line:
-                previous_version = re.search('[0-9]+\.[0-9]+(\.[0-9]+)?', line)
-                if re.match('^- (version )?update( to)?( version)?', line, re.IGNORECASE) and previous_version:
-                    previous_version = previous_version[0]
+            for line in changes:
+                previous_version_match = re.match('^- (?:version )?update(?: to)?(?: version)? ([0-9.]+)', line, re.IGNORECASE)
+                if previous_version_match:
+                    previous_version = previous_version_match[1]
                     break
-                line = changes.readline()
             else:
                 sys.exit("Could not determine the last mentioned version from the changes file.")
             print("Found previous version %s" % previous_version, file=sys.stderr)
