@@ -238,15 +238,16 @@ def main():
     args = parser.parse_args()
 
     if not args.archive:
-        files = glob.glob("*.tar.*z")
+        files = glob.glob("*.tar.*")
         if not files:
-            sys.exit("No *.tar.*z file found!")
+            sys.exit("No *.tar.* file found!")
         elif len(files) > 1:
-            # Try to filter out all names without dots (indicating version numbers)
+            # Filter out all names without numbers (indicating version numbers)
             files = list(filter(lambda fname: re.search('[0-9]', fname), files))
+            # Filter out all names ending with .asc
+            files = list(filter(lambda fname: not fname.endswith('.asc'), files))
             if len(files) > 1 or not files:
-                print(files)
-                sys.exit("More than one *.tar.*z file found! Could not determine which one to use. Try '-a'.")
+                sys.exit(f"More than one *.tar.* file found ({files!r})! Could not determine which one to use. Try '-a'.")
         archivefilename = files[0]
     else:
         archivefilename = args.archive.name

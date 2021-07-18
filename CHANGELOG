@@ -6,6 +6,7 @@ CHANGELOG
 ----------
 ### Changelog extractor
 * Better detect previous version.
+* Archives: Support tar.bz2 and exclude .asc files automatically.
 
 2021-07-17
 ----------
