@@ -8,6 +8,7 @@ CHANGELOG
 * Better detect previous version.
 * Archives: Support tar.bz2 and exclude .asc files automatically.
 * Refactor and fix debian conversion and add tests for it.
+* Helpers: Split source url from filename extraction.
 
 2021-07-17
 ----------

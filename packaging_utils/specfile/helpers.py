@@ -30,7 +30,7 @@ def get_current_version(specfilename: str) -> str:
     return version
 
 
-def get_source_filename(specfilename: str, version: Optional[str] = None) -> List[str]:
+def get_source_urls(specfilename: str, version: Optional[str] = None) -> List[str]:
     """
     Querying the Source tag directly gives weird results. With mypy, Source0 and Source 99 exist.
     `rpmspec --srpm -q --qf "%{Source}" mypy.spec` gives the value of Source99
@@ -45,7 +45,7 @@ def get_source_filename(specfilename: str, version: Optional[str] = None) -> Lis
     if not version:
         version = get_current_version(specfilename)
 
-    filenames = []
+    urls = []
     for spec_line in result.stdout.decode().splitlines():
         source_name = SOURCE_FILENAME.match(spec_line)
         if not source_name:
@@ -53,7 +53,13 @@ def get_source_filename(specfilename: str, version: Optional[str] = None) -> Lis
         url = source_name.group(1)
         if not any(marker in url for marker in SOURCE_VERSION_INDICATORS) and version not in url:
             continue
+        urls.append(url)
+    return urls
 
+
+def get_source_filename(specfilename: str, version: Optional[str] = None) -> List[str]:
+    filenames = []
+    for url in get_source_urls(specfilename, version):
         if '/' not in url:
             filenames.append(url)
         else:
