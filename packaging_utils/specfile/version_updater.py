@@ -43,8 +43,8 @@ def main():
     Main program.
     """
     parser = argparse.ArgumentParser(description='Updates the specfile, removes the old tarball, adds the new one.')
-    parser.add_argument('softwarename', nargs='?', default=detect_softwarename())
-    parser.add_argument('softwareversion', nargs='?')
+    parser.add_argument('-n', '--softwarename', nargs='?', default=detect_softwarename())
+    parser.add_argument('-V', '--softwareversion', nargs='?')
     args = parser.parse_args()
     # only query from libraries.io if necessary
     if args.softwareversion:
