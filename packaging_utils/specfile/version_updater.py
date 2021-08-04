@@ -3,7 +3,6 @@
 Rewrites specfiles to fix the %licsens
 """
 import argparse
-import re
 import sys
 
 from pathlib import Path
@@ -25,6 +24,9 @@ def version_updater(softwarename: str, softwareversion: str):
         return 2
 
     source_names = get_source_filename(specfilename, current_version)
+    if not source_names:
+        print('No source names detected in specfile.')
+        return 2
     for source_name in source_names:
         print(f'deleting old source {source_name}')
         Path(source_name).unlink()

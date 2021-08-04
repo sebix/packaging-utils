@@ -6,6 +6,7 @@ CHANGELOG
 ----------
 ### Specfile
 * Version updater: Convert command line arguments to optional parameters.
+* Version updater: Give text output if no source tag could be detected automatically.
 
 2021-07-18
 ----------
