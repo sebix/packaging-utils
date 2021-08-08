@@ -13,7 +13,7 @@ from .helpers import detect_specfile, get_source_filename, get_current_version, 
 from ..librariesio.get_latest_version import get_latest_version
 
 
-def version_updater(softwarename: str, softwareversion: str):
+def version_updater(softwareversion: str):
     """
     Updates the specfile, removes the old tarball, adds the new one
     """
@@ -53,7 +53,7 @@ def main():
         softwareversion = args.softwareversion
     else:
         softwareversion = get_latest_version(softwarename=args.softwarename)
-    return version_updater(args.softwarename, softwareversion)
+    return version_updater(softwareversion)
 
 
 if __name__ == '__main__':

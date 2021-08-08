@@ -25,7 +25,7 @@ def anitya_find_project_id(proj_name: str) -> Optional[int]:
     search_url = ANITYA_SEARCH_URL % proj_name
     search = requests.get(search_url)
     if search.url == search_url:
-        matches = re.findall('<a href="/project/([0-9]+)/">\s+%s\s+</a>' % proj_name,
+        matches = re.findall(r'<a href="/project/([0-9]+)/">\s+%s\s+</a>' % proj_name,
                              search.text)
         if len(matches) == 1:
             return int(matches[0])
@@ -49,7 +49,7 @@ def do_project(project: str) -> Optional[Tuple[str, str, str]]:
         lines = res.text.splitlines()
         for line in lines:
             if "doap:revision" in line:
-                version = Version(line[line.find('>')+1:line.rfind('<')])
+                version = Version(line[line.find('>') + 1:line.rfind('<')])
                 if version and (max_version is None or version > max_version):
                     max_version = version
     opensuse_version = zypper.package_version(project)

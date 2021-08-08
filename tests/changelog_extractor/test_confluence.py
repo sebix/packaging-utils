@@ -47,6 +47,7 @@ class TextConfluence(unittest.TestCase):
         """
         self.assertEqual(convert_base_after(convert_confluence(convert_base(workrave, 'workrave'), softwarename='workrave')),
                          workrave_expected)
+
     def test_workrave_without_known_name(self):
         """
         Test workrave changelog with confluence syntax and no headings

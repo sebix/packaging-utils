@@ -49,8 +49,14 @@ def fix_license(filename: str, dry_run: bool = False):
     print('Licenses found:', ' '.join(licenses))
     lines.insert(doc_line + 1,
                  '%license' + (' %s' * len(licenses)) % tuple(licenses))
+
+    output = '\n'.join(lines)
+    if dry_run:
+        print(output)
+        return 0
+
     with open(filename, 'wt') as new_handle:
-        new_handle.write('\n'.join(lines))
+        new_handle.write(output)
     return 0
 
 

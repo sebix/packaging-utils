@@ -24,36 +24,39 @@ class IntStr(int):
     def __eq__(self, other):
         if isinstance(other, str):
             return str(self) == other
-        return super(IntStr, self).__eq__(other)
+        return super().__eq__(other)
 
     def __ge__(self, other):
         if isinstance(other, str):
             return str(self) >= other
-        return super(IntStr, self).__ge__(other)
+        return super().__ge__(other)
 
     def __gt__(self, other):
         if isinstance(other, str):
             return str(self) > other
-        return super(IntStr, self).__gt__(other)
+        return super().__gt__(other)
 
     def __le__(self, other):
         if isinstance(other, str):
             return str(self) <= other
-        return super(IntStr, self).__le__(other)
+        return super().__le__(other)
 
     def __lt__(self, other):
         if isinstance(other, str):
             return str(self) < other
-        return super(IntStr, self).__lt__(other)
+        return super().__lt__(other)
 
     def __ne__(self, other):
         if isinstance(other, str):
             return str(self) != other
-        return super(IntStr, self).__ne__(other)
+        return super().__ne__(other)
 
 
 class Version(tuple):
-    def __new__(self, value=Optional[str]):
+
+    original_value: str = ''
+
+    def __new__(cls, value=Optional[str]):
         """
         Returns a tuple of integers and strings of a given string version.
 
@@ -68,7 +71,7 @@ class Version(tuple):
         if not ANY_INT_PATTERN.search(str(value)):
             return None
 
-        new_class = super(Version, self).__new__(Version, value)
+        new_class = super().__new__(Version, value)
         new_class.original_value = original_value
 
         return new_class
@@ -77,5 +80,5 @@ class Version(tuple):
         return self.original_value
 
     def __repr__(self) -> str:
-        retval = super(Version, self).__repr__()
+        retval = super().__repr__()
         return '%s <%r>)' % (retval[:-1], self.original_value)

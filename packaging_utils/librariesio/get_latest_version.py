@@ -5,10 +5,10 @@ Retrieves the latest version from libraries.io
 import argparse
 import sys
 
+import requests
+
 from ..common.config import get_librariesio_api_key
 from ..common.helpers import detect_softwarename
-
-import requests
 
 
 def get_latest_version(softwarename: str):
@@ -19,8 +19,8 @@ def get_latest_version(softwarename: str):
     response = requests.get(f'https://libraries.io/api/pypi/{softwarename}?api_key={api_key}')
     try:
         return response.json()['latest_release_number']
-    except KeyError:
-        raise ValueError(f'Unable to retrieve the latest version number for {softwarename}.')
+    except KeyError as exc:
+        raise ValueError(f'Unable to retrieve the latest version number for {softwarename}.') from exc
 
 
 def main():
