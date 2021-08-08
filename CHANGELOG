@@ -6,6 +6,7 @@ CHANGELOG
 ----------
 ### Changelog extractor
 * Add confluence syntax support for workrave (fixes #10).
+* Optimize previous-version-detection and add tests (fixes #9).
 
 2021-08-04
 ----------

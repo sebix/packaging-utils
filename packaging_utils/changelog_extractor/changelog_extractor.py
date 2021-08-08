@@ -10,6 +10,7 @@ import tarfile
 
 from typing import Optional
 from itertools import compress
+from .helpers import detect_previous_version
 
 
 VERSION_REGEX = r"(?:v|version )?([0-9\.]+)(.*)"
@@ -295,13 +296,7 @@ def main():
     if not args.previous_version:
         # Find previous version in changes file
         with open(changesfilename) as changes:
-            for line in changes:
-                previous_version_match = re.match('^- (?:version )?update(?: to)?(?: version)? ([0-9.]+)', line, re.IGNORECASE)
-                if previous_version_match:
-                    previous_version = previous_version_match[1]
-                    break
-            else:
-                sys.exit("Could not determine the last mentioned version from the changes file.")
+            previous_version = detect_previous_version(chnages)
             print("Found previous version %s" % previous_version, file=sys.stderr)
     else:
         previous_version = args.previous_version
