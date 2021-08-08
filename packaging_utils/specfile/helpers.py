@@ -66,3 +66,17 @@ def get_source_filename(specfilename: str, version: Optional[str] = None) -> Lis
             slash = url.rfind('/')
             filenames.append(url[slash + 1:])
     return filenames
+
+
+def detect_github_tag_prefix(specfilename: str) -> str:
+    urls = get_source_urls(specfilename=specfilename)
+    for url in urls:
+        # catch-all group at the end is required to get at least one group so the logic below works
+        parsed = re.match(r'^https://github.com/[^/]+/[^/]+/archive/(v)?(.*)', url)
+        if parsed:
+            if parsed.group(1) == 'v':
+                return 'v'
+            else:
+                return ''
+    else:
+        raise ValueError('Unable to parse GitHub archive URLs.')

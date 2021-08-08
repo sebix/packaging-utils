@@ -7,6 +7,10 @@ CHANGELOG
 ### Changelog extractor
 * Add confluence syntax support for workrave (fixes #10).
 * Optimize previous-version-detection and add tests (fixes #9).
+* Download and convert changelog from GitHub commit history if appropriate and possible.
+
+### Specfile
+* Helper: Detect GitHub tag prefix from source URL.
 
 2021-08-04
 ----------

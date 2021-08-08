@@ -7,16 +7,21 @@ import re
 import select
 import sys
 import tarfile
+import traceback
 
-from typing import Optional
+from typing import Optional, Tuple
 from itertools import compress
-from .helpers import detect_previous_version
+from .helpers import get_changelog_from_github, detect_previous_version
 
 
 VERSION_REGEX = r"(?:v|version )?([0-9\.]+)(.*)"
+RE_VERSION_REGEX_START = re.compile(f'^{VERSION_REGEX}')
 
 
 def convert_base(changelog: str, softwarename: str = '') -> str:
+    if not isinstance(changelog, str):
+        return changelog
+
     changelog = changelog.replace('\r\n', '\n')
     # ignore rst blocks:
     changelog = re.sub(r"^\.\. .*$", "", changelog, flags=re.MULTILINE)
@@ -235,6 +240,28 @@ Date:   .*?
     return changelog
 
 
+def convert_github(changelog: dict) -> str:
+    changelog = [entry['commit']['message'] for entry in changelog['commits']]
+    changelog.reverse()  # most current to top
+
+    result = []
+    for line in changelog:
+        if line.startswith('[pre-commit.ci]'):
+            continue
+        if line.startswith('Merge pull request'):
+            continue
+        re_version = RE_VERSION_REGEX_START.match(line)
+        if re_version:
+            result.append(f'- update to version {re_version.group(1)}:')
+        else:
+            line = line.strip()
+            line = line.replace('\n\n', '\n')
+            line = line.replace('\n', '\n   ')
+            result.append(f' - {line}')
+
+    return '\n'.join(result)
+
+
 STYLES = {
     # generic
     'debian': convert_debian,
@@ -250,6 +277,7 @@ STYLES = {
     'pymisp': convert_misp,
     'git': convert_git,
     'confluence': convert_confluence,
+    'github': convert_github,
     }
 
 
@@ -296,12 +324,13 @@ def main():
     if not args.previous_version:
         # Find previous version in changes file
         with open(changesfilename) as changes:
-            previous_version = detect_previous_version(chnages)
+            previous_version = detect_previous_version(changes)
             print("Found previous version %s" % previous_version, file=sys.stderr)
     else:
         previous_version = args.previous_version
 
     # find and read changelog from archive
+    changelog_from_github = False
     if archivefilename != '<stdin>':
         with tarfile.open(archivefilename, 'r') as archive:
             # get a list of files matching the pattern
@@ -309,23 +338,37 @@ def main():
                                                                 filename,
                                                                 flags=re.IGNORECASE),
                                      [member.name for member in archive.getmembers() if member.isfile()]))
-            if not candidates:
-                sys.exit('Found no changelog in archive :/')
-            # remove hidden files (in root directory and in subdirectories)
-            candidates = list(filter(lambda name: not re.search('(^\.|/\.)', name), candidates))
-            if args.verbose:
-                print('Changelog candidates:\n*', '\n* '.join(candidates), file=sys.stderr)
-            # find the changelog file with the smallest number of slashes in it's path
-            number_of_slashes = [filename.count('/') for filename in candidates]
-            smallest = min(number_of_slashes)
-            candidate = list(candidates)[list(number_of_slashes).index(smallest)]
-            print("Found changelog file %r." % candidate, file=sys.stderr)
-            changelog = archive.extractfile(candidate).read().decode()
+            if candidates:
+                # remove hidden files (in root directory and in subdirectories)
+                candidates = list(filter(lambda name: not re.search('(^\.|/\.)', name), candidates))
+                if args.verbose:
+                    print('Changelog candidates:\n*', '\n* '.join(candidates), file=sys.stderr)
+                # find the changelog file with the smallest number of slashes in it's path
+                number_of_slashes = [filename.count('/') for filename in candidates]
+                smallest = min(number_of_slashes)
+                candidate = list(candidates)[list(number_of_slashes).index(smallest)]
+                print("Found changelog file %r." % candidate, file=sys.stderr)
+                changelog = archive.extractfile(candidate).read().decode()
+            else:
+                changelog = None
+                try:
+                    changelog = get_changelog_from_github(previous_version=previous_version)
+                except Exception:
+                    if args.verbose:
+                        print(traceback.format_exc(), file=sys.stderr)
+                    sys.exit('Found no changelog in archive and extraction form GitHub failed as well :/')
+                else:
+                    if changelog:
+                        changelog_from_github = True
+                    else:
+                        sys.exit('Found no changelog in archive :/')
     else:
         changelog = sys.stdin.read()
 
     if args.style == 'automatic':
-        if candidate.endswith('debian/changelog'):
+        if changelog_from_github:
+            args.style = 'github'
+        elif candidate.endswith('debian/changelog'):
             args.style = 'debian'
         elif softwarename in STYLES:
             args.style = softwarename
