@@ -166,6 +166,24 @@ def convert_markdown(changelog: str):
     return changelog
 
 
+def convert_confluence(changelog: str, softwarename: Optional[str] = None):
+    """
+    Generic confluence conversion
+    """
+
+    # preface, everything until first list item
+    changelog = re.sub(r"^(.*?)\*", "*", changelog, flags=re.DOTALL)
+
+    version_prefix = f' {softwarename}' if softwarename else ' (?:[^ ]+)'
+    changelog = re.sub(fr"^[\*]{version_prefix} {VERSION_REGEX}$", r"- update to version \1:",
+                       changelog,
+                       flags=re.MULTILINE | re.IGNORECASE)
+
+    # normal entries
+    changelog = re.sub(r"^\*\*", " -", changelog, flags=re.MULTILINE)
+    return changelog
+
+
 def convert_misp(changelog, with_markdown=True):
     """
     Also has third-level headings with ~~~
@@ -230,6 +248,7 @@ STYLES = {
     'misp': convert_misp,
     'pymisp': convert_misp,
     'git': convert_git,
+    'confluence': convert_confluence,
     }
 
 
@@ -321,6 +340,8 @@ def main():
             args.style = 'markdown'
         elif changelog.startswith('commit '):
             args.style = 'git'
+        elif '\n** ' in changelog:
+            args.style = 'confluence'
         else:
             exit('Could not determine which conversion to use.')
         print('Using autodetected style %r' % args.style, file=sys.stderr)
