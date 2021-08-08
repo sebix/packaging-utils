@@ -372,16 +372,16 @@ def main():
             args.style = 'debian'
         elif softwarename in STYLES:
             args.style = softwarename
-        elif candidate.endswith('.rst'):
+        elif candidate.endswith('.rst') or changelog.startswith('.. '):
             args.style = 'rst'
-        elif candidate.endswith('.md'):
+        elif candidate.endswith('.md') or changelog.splitlines()[1].startswith('=='):
             args.style = 'markdown'
         elif changelog.startswith('commit '):
             args.style = 'git'
         elif '\n** ' in changelog:
             args.style = 'confluence'
         else:
-            exit('Could not determine which conversion to use.')
+            sys.exit('Could not determine which conversion to use.')
         print('Using autodetected style %r' % args.style, file=sys.stderr)
 
     changelog = convert_base(changelog, softwarename)

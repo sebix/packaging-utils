@@ -8,6 +8,7 @@ CHANGELOG
 * Add confluence syntax support for workrave (fixes #10).
 * Optimize previous-version-detection and add tests (fixes #9).
 * Download and convert changelog from GitHub commit history if appropriate and possible.
+* Detect rst and changelog automatically with characteristics inside the file (#6).
 
 ### Specfile
 * Helper: Detect GitHub tag prefix from source URL.
