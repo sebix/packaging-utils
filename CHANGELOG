@@ -2,6 +2,14 @@ CHANGELOG
 =========
 
 
+2021-09-04
+----------
+### Changelog extractor
+* Detect GitHub repository also by URL tag of specfile and detect tag prefix by querying the last tag.
+
+### Specfile
+* New method `get_url`.
+
 2021-08-08
 ----------
 ### Changelog extractor

@@ -1,12 +1,12 @@
 import re
 import sys
-from ..specfile.helpers import detect_specfile, get_source_urls, detect_github_tag_prefix, get_current_version
+from ..specfile.helpers import detect_specfile, get_source_urls, detect_github_tag_prefix, get_current_version, get_url
 from urllib.parse import urlparse
 
 import requests
 
 
-RE_GITHUB_PATH_REPO = re.compile('^/([^/]+/[^/]+)/')
+RE_GITHUB_PATH_REPO = re.compile('^/([^/]+/[^/]+)/?')
 
 
 def detect_previous_version(changes):
@@ -21,6 +21,11 @@ def detect_previous_version(changes):
 
 
 def get_changelog_from_github(previous_version: str) -> dict:
+    """
+    First, get the GitHub URL by interpreting the Source tags and the URL tag.
+    Then, detect the tag-prefix.
+    At the end, download the diff.
+    """
     specfilename = detect_specfile()
     current_version = get_current_version(specfilename=specfilename)
 
@@ -29,11 +34,21 @@ def get_changelog_from_github(previous_version: str) -> dict:
         parsed = urlparse(url)
         if parsed.hostname == 'github.com' and 'archive' in parsed.path:
             repo_path = RE_GITHUB_PATH_REPO.match(parsed.path).group(1)
+            tag_prefix = detect_github_tag_prefix(specfilename=specfilename)
             break
     else:
-        sys.exit('Found not source URL with GitHub archive.')
-
-    tag_prefix = detect_github_tag_prefix(specfilename=specfilename)
+        url = get_url(specfilename=specfilename)
+        parsed = urlparse(url)
+        if parsed.hostname == 'github.com':
+            repo_path = RE_GITHUB_PATH_REPO.match(parsed.path).group(1)
+            tags = requests.get(f'https://api.github.com/repos/{repo_path}/tags')
+            tags.raise_for_status()
+            if tags.json()[0]['name'].startswith('v'):
+                tag_prefix = 'v'
+            else:
+                tag_prefix = ''
+        else:
+            sys.exit('Also found not Source URL or URL for GitHub.')
 
     url = f'https://api.github.com/repos/{repo_path}/compare/{tag_prefix}{previous_version}...{tag_prefix}{current_version}'
     print(f'Downloading from: {url}', file=sys.stderr)

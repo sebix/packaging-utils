@@ -12,6 +12,7 @@ from typing import List, Optional
 
 VERSION_MATCH = re.compile(r'^(Version:\s+)(.*?)$', flags=re.MULTILINE)
 SOURCE_FILENAME = re.compile(r'Source[0-9]*:\s+(.*)', flags=re.IGNORECASE)
+RE_SPECFILE_URL = re.compile(r'URL:\s+(.*)', flags=re.IGNORECASE)
 SOURCE_VERSION_INDICATORS = ('%version', '%{version}', '%VERSION', '%{VERSION}')
 
 
@@ -80,3 +81,19 @@ def detect_github_tag_prefix(specfilename: str) -> str:
                 return ''
     else:
         raise ValueError('Unable to parse GitHub archive URLs.')
+
+
+def get_url(specfilename: str) -> Optional[str]:
+    """
+    Get's the URL from a specfile.
+    """
+    result = subprocess.run(['rpmspec', '-P', specfilename],
+                            stdout=subprocess.PIPE)
+    if result.stderr:
+        raise ValueError(result.stderr)
+
+    for spec_line in result.stdout.decode().splitlines():
+        url = RE_SPECFILE_URL.match(spec_line)
+        if not url:
+            continue
+        return url.group(1)

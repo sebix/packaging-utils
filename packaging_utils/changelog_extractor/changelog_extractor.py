@@ -9,7 +9,7 @@ import sys
 import tarfile
 import traceback
 
-from typing import Optional, Tuple
+from typing import Optional
 from itertools import compress
 from .helpers import get_changelog_from_github, detect_previous_version
 
