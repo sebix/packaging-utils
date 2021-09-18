@@ -2,11 +2,13 @@ import re
 import sys
 from ..specfile.helpers import detect_specfile, get_source_urls, detect_github_tag_prefix, get_current_version, get_url
 from urllib.parse import urlparse
+from typing import Optional
 
 import requests
 
 
 RE_GITHUB_PATH_REPO = re.compile('^/([^/]+/[^/]+)/?')
+RE_GIT_COMMIT = re.compile('^[a-f0-9]{40}$')
 
 
 def detect_previous_version(changes):
@@ -20,14 +22,15 @@ def detect_previous_version(changes):
     return previous_version
 
 
-def get_changelog_from_github(previous_version: str) -> dict:
+def get_changelog_from_github(previous_version: str, current_version: Optional[str] = None) -> dict:
     """
     First, get the GitHub URL by interpreting the Source tags and the URL tag.
     Then, detect the tag-prefix.
     At the end, download the diff.
     """
     specfilename = detect_specfile()
-    current_version = get_current_version(specfilename=specfilename)
+    if not current_version:
+        current_version = get_current_version(specfilename=specfilename)
 
     urls = get_source_urls(specfilename=specfilename)
     for url in urls:
@@ -50,7 +53,10 @@ def get_changelog_from_github(previous_version: str) -> dict:
         else:
             sys.exit('Also found not Source URL or URL for GitHub.')
 
-    url = f'https://api.github.com/repos/{repo_path}/compare/{tag_prefix}{previous_version}...{tag_prefix}{current_version}'
+    if not RE_GIT_COMMIT.match(current_version):
+        current_version = tag_prefix + current_version
+
+    url = f'https://api.github.com/repos/{repo_path}/compare/{tag_prefix}{previous_version}...{current_version}'
     print(f'Downloading from: {url}', file=sys.stderr)
     compare = requests.get(url)
     compare.raise_for_status()

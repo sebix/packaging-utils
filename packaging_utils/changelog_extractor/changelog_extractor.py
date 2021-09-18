@@ -289,6 +289,8 @@ def main():
     parser.add_argument('-p', '--previous-version', help='Previous version string to use instead of extraction from *.changes file.')
     parser.add_argument('-a', '--archive', help='The code archive to use and search changelog for.',
                         type=argparse.FileType('r'))
+    parser.add_argument('--github-current-version',
+                        help='Use this as current version for the GitHub extraction. Could be a commit id or tag.')
     args = parser.parse_args()
 
     if not args.archive:
@@ -352,9 +354,9 @@ def main():
             else:
                 changelog = None
                 try:
-                    changelog = get_changelog_from_github(previous_version=previous_version)
+                    changelog = get_changelog_from_github(previous_version=previous_version, current_version=args.github_current_version)
                 except Exception:
-                    if args.verbose:
+                    if args.verbose or args.style == 'github':
                         print(traceback.format_exc(), file=sys.stderr)
                     sys.exit('Found no changelog in archive and extraction form GitHub failed as well :/')
                 else:
