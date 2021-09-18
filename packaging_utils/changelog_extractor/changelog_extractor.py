@@ -234,7 +234,7 @@ Date:   .*?
     # empty lines
     changelog = re.sub(r"\n{2,}", r"\n", changelog)
     # releases
-    changelog = re.sub("^ - (new )?release (of )?([a-z]+-)?([0-9\.]+?)([.:]*)$",
+    changelog = re.sub(r"^ - (new )?release (of )?([a-z]+-)?([0-9\.]+?)([.:]*)$",
                        r"- update to version \4:",
                        changelog, flags=re.MULTILINE | re.IGNORECASE)
     return changelog
@@ -340,7 +340,7 @@ def main():
                                      [member.name for member in archive.getmembers() if member.isfile()]))
             if candidates:
                 # remove hidden files (in root directory and in subdirectories)
-                candidates = list(filter(lambda name: not re.search('(^\.|/\.)', name), candidates))
+                candidates = list(filter(lambda name: not re.search(r'(^\.|/\.)', name), candidates))
                 if args.verbose:
                     print('Changelog candidates:\n*', '\n* '.join(candidates), file=sys.stderr)
                 # find the changelog file with the smallest number of slashes in it's path
