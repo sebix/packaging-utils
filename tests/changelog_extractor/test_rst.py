@@ -136,8 +136,53 @@ time_machine_expected = """
    tarballs per tag.
 """.strip()
 
+geoip2 = """
+.. :changelog:
+
+History
+-------
+
+4.4.0 (2021-09-24)
+++++++++++++++++++
+
+* The public API on ``geoip2.database`` is now explicitly defined by
+  setting ``__all__``.
+* The return type of the ``metadata()`` method on ``Reader`` is now
+  ``maxminddb.reader.Metadata`` rather than a union type.
+
+4.3.0 (2021-09-20)
+++++++++++++++++++
+
+* Previously, the ``py.typed`` file was not being added to the source
+  distribution. It is now explicitly specified in the manifest.
+* The type hints for the database file in the ``Reader`` constructor have
+  been expanded to match those specified by ``maxmindb.open_database``. In
+  particular, ``os.PathLike`` and ``IO`` have been added.
+* Corrected the type hint for the ``metadata()`` method on ``Reader``. It
+  will return a ``maxminddb.extension.Metadata`` if the C extension is being
+  used.
+""".strip()
+geoip2_expected = """
+- update to version 4.4.0:
+ - The public API on ``geoip2.database`` is now explicitly defined by
+   setting ``__all__``.
+ - The return type of the ``metadata()`` method on ``Reader`` is now
+   ``maxminddb.reader.Metadata`` rather than a union type.
+- update to version 4.3.0:
+ - Previously, the ``py.typed`` file was not being added to the source
+   distribution. It is now explicitly specified in the manifest.
+ - The type hints for the database file in the ``Reader`` constructor have
+   been expanded to match those specified by ``maxmindb.open_database``. In
+   particular, ``os.PathLike`` and ``IO`` have been added.
+ - Corrected the type hint for the ``metadata()`` method on ``Reader``. It
+   will return a ``maxminddb.extension.Metadata`` if the C extension is being
+   used.
+""".strip()
+
 
 class TextRst(unittest.TestCase):
+    maxDiff = None
+
     def test_xarray(self):
         self.assertEqual(convert_base_after(convert_rst(convert_base(xarray_original,
                                                                      'xarray')),
@@ -149,3 +194,8 @@ class TextRst(unittest.TestCase):
                                                                      'time-machine')),
                                             '2.1.0'),
                          time_machine_expected)
+
+    def test_geoip2(self):
+        self.assertEqual(convert_base_after(convert_rst(convert_base(geoip2)),
+                                            '4.2.0'),
+                         geoip2_expected)

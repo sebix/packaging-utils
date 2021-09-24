@@ -2,6 +2,12 @@ CHANGELOG
 =========
 
 
+2021-09-24
+----------
+### Changelog extractor
+* rst: remove some headers to support geoip2 format.
+* `convert_base_after`: fix logic for removing changes of previous version. The code erroneously removed the last character if the previous version was not found.
+
 2021-09-18
 ----------
 ### Changelog extractor

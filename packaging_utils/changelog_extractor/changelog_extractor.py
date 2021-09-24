@@ -23,9 +23,7 @@ def convert_base(changelog: str, softwarename: str = '') -> str:
         return changelog
 
     changelog = changelog.replace('\r\n', '\n')
-    # ignore rst blocks:
-    changelog = re.sub(r"^\.\. .*$", "", changelog, flags=re.MULTILINE)
-    # rst history header
+    # generic history headers
     changelog = re.sub(r"^=+\nhistory\n=+$", "", changelog, flags=re.MULTILINE | re.IGNORECASE)
     changelog = re.sub("^#? ?(%s )?change ?log.*$" % softwarename, "", changelog, count=0, flags=re.MULTILINE | re.IGNORECASE)
     return changelog
@@ -43,7 +41,10 @@ def convert_base_after(changelog: str, previous_version: Optional[str] = None):
         changelog = re.sub(author_pattern + ".*?^( {,%d}-)" % spaces, r"\1", changelog, flags=re.IGNORECASE | re.MULTILINE | re.DOTALL)
 
     if previous_version:
-        changelog = changelog[:changelog.find("- update to version %s:" % previous_version)]
+        previous_version_position = changelog.find(f"- update to version {previous_version}:")
+        # if the previous_version is not found, there's nothing to scrap.
+        if previous_version_position != -1:
+            changelog = changelog[:previous_version_position]
 
     # ornamental lines or heading leftovers
     changelog = re.sub(r"^[=~-]+$", "", changelog, flags=re.MULTILINE)
@@ -108,9 +109,14 @@ def convert_rst(changelog: str):
     Xonsh headers:
     **Header:**
     """
-    # xarray preface until first verion (rst?)
+    # ignore rst blocks:
+    changelog = re.sub(r"^\.\. .*$", "", changelog, flags=re.MULTILINE)
+
+    # xarray preface until first verion
     changelog = re.sub(r"^(.*?)\nv", "v", changelog, flags=re.DOTALL)
 
+    # first level headers
+    changelog = re.sub(r"^\nhistory\n-+$", "", changelog, flags=re.MULTILINE | re.IGNORECASE)
 
     # normal list entries
     # Are ~ headers used?
@@ -122,7 +128,8 @@ def convert_rst(changelog: str):
         changelog = re.sub(r"^[-\*] (.*)$", r" - \1", changelog, flags=re.MULTILINE)
 
     # versions, with or without date
-    changelog = re.sub(r"^v?([0-9\.]+)( \(.*?\))?$", r"- update to version \1:", changelog, flags=re.MULTILINE)
+    # following line may be a '+' line
+    changelog = re.sub(r"^v?([0-9\.]+)( \(.*?\))?(\n[+]+)?$", r"- update to version \1:", changelog, flags=re.MULTILINE)
 
     # sections
     changelog = re.sub(r"^\*?\*?([A-Za-z]+.*?):?\*?\*?$", r" - \1:", changelog, flags=re.MULTILINE)
