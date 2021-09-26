@@ -14,6 +14,9 @@ VERSION_MATCH = re.compile(r'^(Version:\s+)(.*?)$', flags=re.MULTILINE)
 SOURCE_FILENAME = re.compile(r'Source[0-9]*:\s+(.*)', flags=re.IGNORECASE)
 RE_SPECFILE_URL = re.compile(r'URL:\s+(.*)', flags=re.IGNORECASE)
 SOURCE_VERSION_INDICATORS = ('%version', '%{version}', '%VERSION', '%{VERSION}')
+# catch-all group at the end is required to get at least one group so that we can always query a group
+RE_GITHUB_ARCHIVE_PREFIX = re.compile(r'^https://github.com/[^/]+/[^/]+/archive/(v)?(.*)')
+RE_GITHUB_ARCHIVE_REF_PREFIX = re.compile(r'^https://github.com/[^/]+/[^/]+/archive/refs/tags/(v)?(.*)')
 
 
 def detect_specfile() -> str:
@@ -70,17 +73,25 @@ def get_source_filename(specfilename: str, version: Optional[str] = None) -> Lis
 
 
 def detect_github_tag_prefix(specfilename: str) -> str:
+    """
+    Supports
+    https://github.com/asottile/pyupgrade/archive/refs/tags/v%{version}.tar.gz
+    and
+    https://github.com/asottile/pyupgrade/archive/v%{version}.tar.gz
+    URLs
+    """
     urls = get_source_urls(specfilename=specfilename)
     for url in urls:
-        # catch-all group at the end is required to get at least one group so the logic below works
-        parsed = re.match(r'^https://github.com/[^/]+/[^/]+/archive/(v)?(.*)', url)
+        if 'refs/tags' in url:
+            parsed = RE_GITHUB_ARCHIVE_REF_PREFIX.match(url)
+        else:
+            parsed = RE_GITHUB_ARCHIVE_PREFIX.match(url)
         if parsed:
             if parsed.group(1) == 'v':
                 return 'v'
             else:
                 return ''
-    else:
-        raise ValueError('Unable to parse GitHub archive URLs.')
+    raise ValueError('Unable to parse GitHub archive URLs.')
 
 
 def get_url(specfilename: str) -> Optional[str]:
