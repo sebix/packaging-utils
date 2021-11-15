@@ -3,6 +3,7 @@
 """
 import argparse
 import glob
+from pathlib import Path
 import re
 import select
 import sys
@@ -349,13 +350,27 @@ def main():
                                      [member.name for member in archive.getmembers() if member.isfile()]))
             if candidates:
                 # remove hidden files (in root directory and in subdirectories)
-                candidates = list(filter(lambda name: not re.search(r'(^\.|/\.)', name), candidates))
+                candidates = tuple(filter(lambda name: not re.search(r'(^\.|/\.)', name), candidates))
                 if args.verbose:
                     print('Changelog candidates:\n*', '\n* '.join(candidates), file=sys.stderr)
+                # Remove empty files
+                empty_files = tuple(not archive.extractfile(candidate).read().strip() for candidate in candidates)
+                if any(empty_files):
+                    if args.verbose:
+                        print('Ignoring empty files:', tuple(compress(candidates, empty_files)), file=sys.stderr)
+                    candidates = tuple(compress(candidates, tuple(map(lambda x: not x, empty_files))))
+                # Remove files with dashes in filename
+                dashes = tuple('-' in Path(candidate).name for candidate in candidates)
+                if any(dashes):
+                    if args.verbose:
+                        print('Ignoring files with dashes in filenames:', tuple(compress(candidates, dashes)), file=sys.stderr)
+                    candidates = tuple(compress(candidates, tuple(map(lambda x: not x, dashes))))
                 # find the changelog file with the smallest number of slashes in it's path
+                if args.verbose:
+                    print('Selecting file with smallest number of slashes in path.', file=sys.stderr)
                 number_of_slashes = [filename.count('/') for filename in candidates]
                 smallest = min(number_of_slashes)
-                candidate = list(candidates)[list(number_of_slashes).index(smallest)]
+                candidate = tuple(candidates)[tuple(number_of_slashes).index(smallest)]
                 print("Found changelog file %r." % candidate, file=sys.stderr)
                 changelog = archive.extractfile(candidate).read().decode()
             else:
@@ -383,7 +398,7 @@ def main():
             args.style = softwarename
         elif candidate.endswith('.rst') or changelog.startswith('.. '):
             args.style = 'rst'
-        elif candidate.endswith('.md') or changelog.splitlines()[1].startswith('=='):
+        elif candidate.endswith('.md') or (len(changelog.splitlines()) >= 1 and changelog.splitlines()[1].startswith('==')):
             args.style = 'markdown'
         elif changelog.startswith('commit '):
             args.style = 'git'
