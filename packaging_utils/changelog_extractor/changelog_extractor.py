@@ -17,6 +17,7 @@ from .helpers import get_changelog_from_github, detect_previous_version
 
 VERSION_REGEX = r"(?:v|version )?([0-9\.]+)(.*)"
 RE_VERSION_REGEX_START = re.compile(f'^{VERSION_REGEX}')
+RE_TWO_DASHES = re.compile(r'.*?\-.*?\-.*?')
 
 
 def convert_base(changelog: str, softwarename: str = '') -> str:
@@ -360,8 +361,9 @@ def main():
                     if args.verbose:
                         print('Ignoring empty files:', tuple(compress(candidates, empty_files)), file=sys.stderr)
                     candidates = tuple(compress(candidates, tuple(map(lambda x: not x, empty_files))))
-                # Remove files with dashes in filename
-                dashes = tuple('-' in Path(candidate).name for candidate in candidates)
+                # Remove files with two dashes in filename
+                # example subnetcalc: false-positive "filter-debian-changelog"
+                dashes = tuple(RE_TWO_DASHES.match(Path(candidate).name) for candidate in candidates)
                 if any(dashes):
                     if args.verbose:
                         print('Ignoring files with dashes in filenames:', tuple(compress(candidates, dashes)), file=sys.stderr)
