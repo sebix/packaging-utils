@@ -348,9 +348,10 @@ def main():
                                                                 filename,
                                                                 flags=re.IGNORECASE),
                                      [member.name for member in archive.getmembers() if member.isfile()]))
+            print('Changelog candidates:\n*', '\n* '.join(candidates), file=sys.stderr)
             if candidates:
-                # remove hidden files (in root directory and in subdirectories)
-                candidates = tuple(filter(lambda name: not re.search(r'(^\.|/\.)', name), candidates))
+                # remove hidden files (in root directory and in subdirectories). './' is allowed though
+                candidates = tuple(filter(lambda name: not re.search(r'(^\.(^/)|/\.)', name), candidates))
                 if args.verbose:
                     print('Changelog candidates:\n*', '\n* '.join(candidates), file=sys.stderr)
                 # Remove empty files
