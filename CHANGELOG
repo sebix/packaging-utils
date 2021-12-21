@@ -5,7 +5,8 @@ CHANGELOG
 2021-12-21
 ----------
 ### Changelog extractor
-* Save verbose flag globally to use it in all functions
+* Save verbose flag globally to use it in all functions.
+* MarkDown: Support version declarations in square brackets [] (used by pdftk).
 
 2021-12-10
 ----------

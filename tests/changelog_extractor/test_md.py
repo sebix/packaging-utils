@@ -135,6 +135,25 @@ dateutil_expected = """
  - Data updates:
   - Updated tzdata version to 2019c.
 """.strip()
+pdftk = """
+## [3.3.2] - 2021-12-20
+
+### Fixed
+ - Crash with inputs that contain null pointers
+ - Support reading xfdf forms from stdin
+ - Crash with xdf forms with no catalog
+ - Compatibility with bcprov 1.70
+ - Crash with non-conforming inputs
+""".strip()
+pdftk_expected = """
+- update to version 3.3.2:
+ - Fixed:
+ - Crash with inputs that contain null pointers
+ - Support reading xfdf forms from stdin
+ - Crash with xdf forms with no catalog
+ - Compatibility with bcprov 1.70
+ - Crash with non-conforming inputs
+""".strip()
 
 
 class TextMd(unittest.TestCase):
@@ -169,3 +188,11 @@ class TextMd(unittest.TestCase):
         """
         self.assertEqual(convert_base_after(convert_markdown(convert_base(dateutil, 'dateutil'))),
                          dateutil_expected)
+
+    def test_pdftk(self):
+        """
+        Test pdftk changelog
+        Encloses the [version] in brackets and has two levels with headings (which we ignore for now).
+        """
+        self.assertEqual(convert_base_after(convert_markdown(convert_base(pdftk, 'pdftk'))),
+                         pdftk_expected)

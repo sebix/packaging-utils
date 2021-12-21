@@ -15,7 +15,8 @@ from itertools import compress
 from .helpers import get_changelog_from_github, detect_previous_version
 
 
-VERSION_REGEX = r"(?:v|version )?([0-9\.]+)(.*)"
+# accepts formats like "[3.3.2]"
+VERSION_REGEX = r"(?:v|version )?\[?([0-9\.]+)\]?(.*)"
 RE_VERSION_REGEX_START = re.compile(f'^{VERSION_REGEX}')
 RE_TWO_DASHES = re.compile(r'.*?\-.*?\-.*?')
 
@@ -159,6 +160,8 @@ def convert_markdown(changelog: str):
                                                   changelog,
                                                   flags=re.MULTILINE | re.IGNORECASE)
         if version_replacements:
+            if VERBOSE:
+                print(f'Markdown converter: Using {prefix} as version header prefix.', file=sys.stderr)
             break
     else:
         print('Unable to detect version headers.', file=sys.stderr)
