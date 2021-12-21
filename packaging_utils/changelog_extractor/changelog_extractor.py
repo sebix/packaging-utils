@@ -19,6 +19,8 @@ VERSION_REGEX = r"(?:v|version )?([0-9\.]+)(.*)"
 RE_VERSION_REGEX_START = re.compile(f'^{VERSION_REGEX}')
 RE_TWO_DASHES = re.compile(r'.*?\-.*?\-.*?')
 
+VERBOSE = False
+
 
 def convert_base(changelog: str, softwarename: str = '') -> str:
     if not isinstance(changelog, str):
@@ -301,6 +303,8 @@ def main():
     parser.add_argument('--github-current-version',
                         help='Use this as current version for the GitHub extraction. Could be a commit id or tag.')
     args = parser.parse_args()
+    global VERBOSE
+    VERBOSE = args.verbose
 
     if not args.archive:
         files = glob.glob("*.tar.*")
