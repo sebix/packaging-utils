@@ -6,6 +6,7 @@ import glob
 from pathlib import Path
 import re
 import select
+import subprocess
 import sys
 import tarfile
 import traceback
@@ -305,6 +306,9 @@ def main():
                         type=argparse.FileType('r'))
     parser.add_argument('--github-current-version',
                         help='Use this as current version for the GitHub extraction. Could be a commit id or tag.')
+    parser.add_argument('--vc',
+                        help='Put the changelog into the changes file with `osc vc` if extraction suceeded.',
+                        action='store_true')
     args = parser.parse_args()
     global VERBOSE
     VERBOSE = args.verbose
@@ -423,7 +427,10 @@ def main():
 #    print(changelog[:200])
     changelog = convert_base_after(changelog, previous_version)
     try:
-        print(changelog)
+        if args.vc:
+            subprocess.call(('osc', 'vc', '-m', changelog))
+        else:
+            print(changelog)
     except BrokenPipeError:
         pass
 
