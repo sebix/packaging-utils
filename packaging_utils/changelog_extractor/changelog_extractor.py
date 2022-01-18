@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tarfile
 import traceback
+import zipfile
 
 from typing import Optional
 from itertools import compress
@@ -314,9 +315,9 @@ def main():
     VERBOSE = args.verbose
 
     if not args.archive:
-        files = glob.glob("*.tar.*")
+        files = glob.glob("*.tar.*") or glob.glob("*.zip")
         if not files:
-            sys.exit("No *.tar.* file found!")
+            sys.exit("No *.tar.* or *.zip file found!")
         elif len(files) > 1:
             # Filter out all names without numbers (indicating version numbers)
             files = list(filter(lambda fname: re.search('[0-9]', fname), files))
@@ -327,6 +328,11 @@ def main():
         archivefilename = files[0]
     else:
         archivefilename = args.archive.name
+        print(args.archive.name, type(args.archive.name))
+    if archivefilename.endswith(".zip"):
+        archive_opener = zipfile.ZipFile
+    else:
+        archive_opener = tarfile.open
     softwarename = archivefilename[:archivefilename.rfind('-')]
     if softwarename.startswith('python-'):
         softwarename = softwarename[7:]
@@ -354,7 +360,7 @@ def main():
     # find and read changelog from archive
     changelog_from_github = False
     if archivefilename != '<stdin>':
-        with tarfile.open(archivefilename, 'r') as archive:
+        with archive_opener(archivefilename, 'r') as archive:
             # get a list of files matching the pattern
             candidates = list(filter(lambda filename: re.search('(changes|changelog|history(of changes)?|whats.new|news)[^/]*$',
                                                                 filename,

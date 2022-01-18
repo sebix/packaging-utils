@@ -6,6 +6,7 @@ CHANGELOG
 ----------
 ### Changelog extractor
 * Added parameter `--vc` to call `osc vc` with the extracted changelog.
+* Added support for zip source archive files.
 
 2021-12-21
 ----------
