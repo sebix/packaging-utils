@@ -14,6 +14,7 @@ Tools
 * `changelog_extractor`: Extracts the changelog from a file in an archive, shows the changes sinnce the last version found in the changes file and converts it to the RPM changelog format.
 * `librariesio-latest-version`: Retrieves the latest version from libraries.io (currently only PyPI is supported) for the given software. The name of the software can be detected from the current working directory.
 * `specfile-version-updater`: Updates the version in the spec file, remove the old tarball and add the new one.
+* `update-packages`: If called with the name of a package, it searches for it in `~/packaging/`, excluding `home:*`-directories, calls `specfile-version-updater`, tries to build it, calls `changelog-extractor`, applies it, and commits the updated package.
 
 Configuration
 -------------
