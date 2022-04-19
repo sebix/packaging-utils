@@ -6,6 +6,7 @@ CHANGELOG
 ----------
 ### Changelog extractor
 * Added GitHub releases changelog extractor (partially working).
+* Added `update-packages.sh` script.
 
 2022-01-18
 ----------

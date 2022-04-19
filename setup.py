@@ -9,7 +9,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as handle:
 
 setup(
     name='packaging_utils',
-    version='0.2.0',
+    version='0.2.1',
     maintainer='Sebastian Wagner',
     maintainer_email='sebix@sebix.at',
     python_requires='>=3.6',
