@@ -61,3 +61,37 @@ def get_changelog_from_github(previous_version: str, current_version: Optional[s
     compare = requests.get(url)
     compare.raise_for_status()
     return compare.json()
+
+
+def get_changelog_from_github_releases(previous_version: str, current_version: Optional[str] = None) -> dict:
+    """
+    First, get the GitHub URL by interpreting the Source tags and the URL tag.
+    Then, detect the tag-prefix.
+    At the end, download the diff.
+    """
+    specfilename = detect_specfile()
+    if not current_version:
+        current_version = get_current_version(specfilename=specfilename)
+
+    urls = get_source_urls(specfilename=specfilename)
+    for url in urls:
+        parsed = urlparse(url)
+        if parsed.hostname == 'github.com' and 'archive' in parsed.path:
+            repo_path = RE_GITHUB_PATH_REPO.match(parsed.path).group(1)
+            tag_prefix = detect_github_tag_prefix(specfilename=specfilename)
+            break
+    else:
+        url = get_url(specfilename=specfilename)
+        parsed = urlparse(url)
+        if parsed.hostname == 'github.com':
+            repo_path = RE_GITHUB_PATH_REPO.match(parsed.path).group(1)
+            releases = requests.get(f'https://api.github.com/repos/{repo_path}/releases')
+            releases.raise_for_status()
+            if releases.json()[0]['name'].startswith('v'):
+                tag_prefix = 'v'
+            else:
+                tag_prefix = ''
+        else:
+            sys.exit('Also found no Source URL or URL for GitHub.')
+
+    return {release['tag']: release['body'] for release in releases.json()}

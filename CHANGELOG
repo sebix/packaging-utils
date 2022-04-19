@@ -2,6 +2,11 @@ CHANGELOG
 =========
 
 
+2022-04-19
+----------
+### Changelog extractor
+* Added GitHub releases changelog extractor (partially working).
+
 2022-01-18
 ----------
 ### Changelog extractor

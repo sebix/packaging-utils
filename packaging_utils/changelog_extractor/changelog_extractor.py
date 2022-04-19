@@ -278,6 +278,28 @@ def convert_github(changelog: dict) -> str:
     return '\n'.join(result)
 
 
+def convert_github_releases(changelog: dict) -> str:
+    changelog = [entry['commit']['message'] for entry in changelog['commits']]
+    changelog.reverse()  # most current to top
+
+    result = []
+    for line in changelog:
+        if line.startswith('[pre-commit.ci]'):
+            continue
+        if line.startswith('Merge pull request'):
+            continue
+        re_version = RE_VERSION_REGEX_START.match(line)
+        if re_version:
+            result.append(f'- update to version {re_version.group(1)}:')
+        else:
+            line = line.strip()
+            line = line.replace('\n\n', '\n')
+            line = line.replace('\n', '\n   ')
+            result.append(f' - {line}')
+
+    return '\n'.join(result)
+
+
 STYLES = {
     # generic
     'debian': convert_debian,
@@ -294,6 +316,7 @@ STYLES = {
     'git': convert_git,
     'confluence': convert_confluence,
     'github': convert_github,
+    'github_releases': convert_github_releases,
     }
 
 
@@ -359,7 +382,8 @@ def main():
 
     # find and read changelog from archive
     changelog_from_github = False
-    if archivefilename != '<stdin>':
+    try_github = False
+    if archivefilename != '<stdin>' and not args.style.startswith('github'):
         with archive_opener(archivefilename, 'r') as archive:
             # get a list of files matching the pattern
             candidates = list(filter(lambda filename: re.search('(changes|changelog|history(of changes)?|whats.new|news)[^/]*$',
@@ -394,20 +418,23 @@ def main():
                 print("Found changelog file %r." % candidate, file=sys.stderr)
                 changelog = archive.extractfile(candidate).read().decode()
             else:
-                changelog = None
-                try:
-                    changelog = get_changelog_from_github(previous_version=previous_version, current_version=args.github_current_version)
-                except Exception:
-                    if args.verbose or args.style == 'github':
-                        print(traceback.format_exc(), file=sys.stderr)
-                    sys.exit('Found no changelog in archive and extraction form GitHub failed as well :/')
-                else:
-                    if changelog:
-                        changelog_from_github = True
-                    else:
-                        sys.exit('Found no changelog in archive :/')
+                try_github = True
     else:
         changelog = sys.stdin.read()
+
+    if try_github or args.style.startswith('github'):
+        changelog = None
+        try:
+            changelog = get_changelog_from_github(previous_version=previous_version, current_version=args.github_current_version)
+        except Exception:
+            if args.verbose or args.style == 'github':
+                print(traceback.format_exc(), file=sys.stderr)
+            sys.exit('Found no changelog in archive and extraction from GitHub failed as well :/')
+        else:
+            if changelog:
+                changelog_from_github = True
+            else:
+                sys.exit('Found no changelog in archive :/')
 
     if args.style == 'automatic':
         if changelog_from_github:
