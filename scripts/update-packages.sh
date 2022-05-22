@@ -3,7 +3,7 @@
 for pkg in "$@"; do
     SAVEIFS=$IFS   # Save current IFS
     IFS=$'\n'      # Change IFS to new line
-    pkgdir=( $(find "${PACKAGING_DIR:-$HOME/packaging}/*/*" -maxdepth 0 \! -path '*/home:*' -type d -name "\*$pkg\*") )
+    pkgdir=( $(find ${PACKAGING_DIR:-$HOME/packaging}/*/* -maxdepth 0 \! -path '*/home:*' -type d -name "*$pkg*") )
     IFS=$SAVEIFS   # Restore IFS
 
     if [ ${#pkgdir[@]} -eq 0 ]; then

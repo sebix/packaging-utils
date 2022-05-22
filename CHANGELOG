@@ -4,6 +4,9 @@ CHANGELOG
 
 2022-05-22
 ----------
+### update-packages
+* Fix command to find package-directories.
+
 ### Changelog extractor
 * `--vc`: remove `- ` at start, `osc vc -m` now adds it itself.
 
