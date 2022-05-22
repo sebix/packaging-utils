@@ -461,6 +461,8 @@ def main():
     changelog = convert_base_after(changelog, previous_version)
     try:
         if args.vc:
+            if changelog.startswith('- '):
+                changelog = changelog[2:]
             subprocess.call(('osc', 'vc', '-m', changelog))
         else:
             print(changelog)
