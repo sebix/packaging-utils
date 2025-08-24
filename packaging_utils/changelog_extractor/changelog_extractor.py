@@ -12,9 +12,10 @@ import tarfile
 import traceback
 import zipfile
 
+from textwrap import indent
 from typing import Optional
 from itertools import compress
-from .helpers import get_changelog_from_github, detect_previous_version
+from .helpers import get_changelog_from_github, detect_previous_version, github_type
 
 
 # accepts formats like "[3.3.2]"
@@ -185,6 +186,8 @@ def convert_markdown(changelog: str):
     # translate all normal entries, except for the "- update to version" lines
     changelog = re.sub(r"^[\*-] ((?!update to version).*)$", fr" {default_whitespace_prefix}- \1", changelog, flags=re.MULTILINE)
     changelog = re.sub(r"^(\w)(.*)$", fr" {default_whitespace_prefix}- \1\2", changelog, flags=re.MULTILINE)
+    # remove "**Full Changelog**: <URL>"
+    changelog = re.sub(r"^[*]{0,2}Full changelog[*]{0,2}: http(.*)$", "", changelog, flags=re.MULTILINE | re.IGNORECASE)
     return changelog
 
 
@@ -308,15 +311,15 @@ STYLES = {
     'markdown': convert_markdown,
     'rst': convert_rst,
     'textile': convert_textile,
+    'git': convert_git,
+    'confluence': convert_confluence,
+    'github': convert_github,
+    'github_releases': convert_github_releases,
     # specific
     'axel': convert_axel,
     'xonsh': convert_rst,
     'misp': convert_misp,
     'pymisp': convert_misp,
-    'git': convert_git,
-    'confluence': convert_confluence,
-    'github': convert_github,
-    'github_releases': convert_github_releases,
     }
 
 
@@ -383,6 +386,7 @@ def main():
     # find and read changelog from archive
     changelog_from_github = False
     try_github = False
+    candidate = None
     if archivefilename != '<stdin>' and not args.style.startswith('github'):
         with archive_opener(archivefilename, 'r') as archive:
             # get a list of files matching the pattern
@@ -390,8 +394,9 @@ def main():
                                                                 filename,
                                                                 flags=re.IGNORECASE),
                                      [member.name for member in archive.getmembers() if member.isfile()]))
-            print('Changelog candidates:\n*', '\n* '.join(candidates), file=sys.stderr)
+            print(f'{len(candidates)} changelog candidates')
             if candidates:
+                print(indent('\n'.join(candidates), prefix='*'))
                 # remove hidden files (in root directory and in subdirectories). './' is allowed though
                 candidates = tuple(filter(lambda name: not re.search(r'(^\.(^/)|/\.)', name), candidates))
                 if args.verbose:
@@ -425,7 +430,7 @@ def main():
     if try_github or args.style.startswith('github'):
         changelog = None
         try:
-            changelog = get_changelog_from_github(previous_version=previous_version, current_version=args.github_current_version)
+            changelog, changelog_github_type = get_changelog_from_github(previous_version=previous_version, current_version=args.github_current_version)
         except Exception:
             if args.verbose or args.style == 'github':
                 print(traceback.format_exc(), file=sys.stderr)
@@ -437,15 +442,17 @@ def main():
                 sys.exit('Found no changelog in archive :/')
 
     if args.style == 'automatic':
-        if changelog_from_github:
+        if changelog_from_github and changelog_github_type == github_type.COMPARE:
             args.style = 'github'
-        elif candidate.endswith('debian/changelog'):
+        elif candidate and candidate.endswith('debian/changelog'):
             args.style = 'debian'
         elif softwarename in STYLES:
             args.style = softwarename
-        elif candidate.endswith('.rst') or changelog.startswith('.. '):
+        elif candidate and candidate.endswith('.rst') or changelog.startswith('.. '):
             args.style = 'rst'
-        elif candidate.endswith('.md') or (len(changelog.splitlines()) >= 1 and changelog.splitlines()[1].startswith('==')):
+        elif (candidate and candidate.endswith('.md') or
+              (len(changelog.splitlines()) >= 1 and changelog.splitlines()[1].startswith('==')) or
+              changelog_from_github and changelog_github_type == github_type.RELEASE):
             args.style = 'markdown'
         elif changelog.startswith('commit '):
             args.style = 'git'
